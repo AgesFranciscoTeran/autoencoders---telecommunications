@@ -1,0 +1,7 @@
+# Nivel 1 (sin GPU): teoria y baselines clasicos
+numpy>=1.24
+pandas>=2.0
+matplotlib>=3.7
+
+# Nivel 2 (con GPU): barrido de autoencoders
+# torch>=2.1     # instalar segun la version de CUDA: https://pytorch.org/get-started/locally/

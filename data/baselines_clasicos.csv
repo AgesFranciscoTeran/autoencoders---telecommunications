@@ -1,0 +1,21 @@
+fuente,latente_bits,tasa,compresion,ber_baseline,metodo
+random,35,0.07,14.29,0.4161,PCA d=35 b=1
+random,70,0.14,7.14,0.3789,PCA d=70 b=1
+random,125,0.25,4.0,0.3354,PCA d=125 b=1
+random,250,0.5,2.0,0.2536,PCA d=250 b=1
+oversamp,35,0.07,14.29,0.3238,PCA d=35 b=1
+oversamp,70,0.14,7.14,0.2322,PCA d=70 b=1
+oversamp,125,0.25,4.0,0.0,decimacion m=4 (hold)
+oversamp,250,0.5,2.0,0.0,decimacion m=2 (hold)
+markov,35,0.07,14.29,0.1525,decimacion m=15 (vecino)
+markov,70,0.14,7.14,0.091,decimacion m=8 (vecino)
+markov,125,0.25,4.0,0.049,decimacion m=4 (vecino)
+markov,250,0.5,2.0,0.025,decimacion m=2 (hold)
+lowdim,35,0.07,14.29,0.1972,PCA d=35 b=1
+lowdim,70,0.14,7.14,0.1776,PCA d=35 b=2
+lowdim,125,0.25,4.0,0.0582,PCA d=31 b=4
+lowdim,250,0.5,2.0,0.0465,PCA d=62 b=4
+code,35,0.07,14.29,0.4153,PCA d=35 b=1
+code,70,0.14,7.14,0.3794,PCA d=70 b=1
+code,125,0.25,4.0,0.335,PCA d=125 b=1
+code,250,0.5,2.0,0.0,oraculo 250/250

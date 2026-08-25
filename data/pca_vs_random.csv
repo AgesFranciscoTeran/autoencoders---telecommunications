@@ -1,0 +1,21 @@
+fuente,latente_bits,ber_pca,config
+random,35,0.4161,PCA d=35 b=1
+random,70,0.3789,PCA d=70 b=1
+random,125,0.3354,PCA d=125 b=1
+random,250,0.2536,PCA d=250 b=1
+oversamp,35,0.3238,PCA d=35 b=1
+oversamp,70,0.2322,PCA d=70 b=1
+oversamp,125,0.0999,PCA d=125 b=1
+oversamp,250,0.0774,PCA d=125 b=2
+markov,35,0.1808,PCA d=35 b=1
+markov,70,0.1422,PCA d=70 b=1
+markov,125,0.0958,PCA d=31 b=4
+markov,250,0.041,PCA d=62 b=4
+lowdim,35,0.1972,PCA d=35 b=1
+lowdim,70,0.1776,PCA d=35 b=2
+lowdim,125,0.0582,PCA d=31 b=4
+lowdim,250,0.0465,PCA d=62 b=4
+code,35,0.4153,PCA d=35 b=1
+code,70,0.3794,PCA d=70 b=1
+code,125,0.335,PCA d=125 b=1
+code,250,0.2529,PCA d=250 b=1

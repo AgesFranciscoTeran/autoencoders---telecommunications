@@ -1,0 +1,11 @@
+title: Autoencoders para compresión BPSK — bitácora
+description: Bitácora personal de experimentos, decisiones y correcciones
+theme: jekyll-theme-cayman
+lang: es
+markdown: kramdown
+kramdown:
+  math_engine: mathjax
+exclude:
+  - res/
+  - "*.bak"
+  - __pycache__/
