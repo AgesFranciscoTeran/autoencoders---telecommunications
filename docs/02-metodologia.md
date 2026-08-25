@@ -95,3 +95,5 @@ El razonamiento es el de calibrar un instrumento contra un patrón conocido. Si
 una balanza indica 0.5 kg para una pesa patrón de 1 kg, la conclusión no es que
 la gravedad cambió. Mientras el arnés no apruebe este test, sus números miden
 defectos de implementación y no propiedades de los autoencoders.
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/MathJax.js?config=TeX-MML-AM_CHTML" async></script>

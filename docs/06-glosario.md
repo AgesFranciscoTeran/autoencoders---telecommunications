@@ -204,3 +204,5 @@ resultado": es **resultado imposible**, y por tanto un bug.
 
 **Media contaminada** — El costo medio de anidar salía −0.037 por culpa de una
 corrida colapsada; la mediana daba −0.0006. Con outliers, usar mediana.
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/MathJax.js?config=TeX-MML-AM_CHTML" async></script>

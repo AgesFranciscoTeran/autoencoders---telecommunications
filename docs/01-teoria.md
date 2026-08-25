@@ -106,3 +106,5 @@ confiables**. El decoder emite logits que funcionan como razones de verosimilitu
 de decisión blanda los limpia. Un cociente BER/BER-top90 muy superior a 1 es el
 argumento de viabilidad; un cociente cercano a 1 significa que los errores están
 repartidos uniformemente y ni el FEC ayudará.
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/MathJax.js?config=TeX-MML-AM_CHTML" async></script>

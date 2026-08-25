@@ -328,3 +328,5 @@ Los tres refutaron afirmaciones previas. Es lo que se esperaba de ellos.
   épocas fijas, duplicar los datos duplicaba las actualizaciones.
 
 Ver [Hacia un paper](07-hacia-paper.html) para lo que queda abierto.
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/MathJax.js?config=TeX-MML-AM_CHTML" async></script>
