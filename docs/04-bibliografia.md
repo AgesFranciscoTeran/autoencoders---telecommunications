@@ -172,11 +172,15 @@ tasa es contable en bits por construcción.
 gradient-based deep learning.* Proceedings of ICML.
 
 Demuestra clases de problemas donde el descenso de gradiente falla pese a que la
-red tiene capacidad de sobra, con la paridad como caso central. **Es el sustento
-teórico de la hipótesis principal del proyecto**: si un MLP no aprende XOR de
-grado ≥ 3, entonces no puede descubrir la redundancia de un código de bloque
-cuyos checks son exactamente de grado 3. La etapa de diagnóstico de paridad del
-arnés pone esto a prueba de forma aislada.
+red tiene capacidad de sobra, con la paridad como caso central. Fue el sustento
+teórico de la hipótesis inicial del proyecto: que un MLP no podría descubrir la
+redundancia de un código de bloque cuyos checks son de grado 3.
+
+**El diagnóstico refutó esa aplicación.** Con 500 bits de entrada y grado 3, un
+MLP alcanza acc_test = 1.0000; solo falla en grado 4. La obra sigue siendo
+correcta —hay problemas donde el gradiente falla— pero el caso concreto de este
+proyecto no era uno de ellos, y la explicación del fracaso sobre `code` tuvo que
+reformularse en términos del objetivo de entrenamiento, no de la aprendibilidad.
 
 **van den Oord, A., Vinyals, O., & Kavukcuoglu, K. (2017).** *Neural discrete
 representation learning.* NeurIPS. (VQ-VAE)

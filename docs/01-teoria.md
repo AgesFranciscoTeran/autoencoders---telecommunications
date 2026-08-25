@@ -27,13 +27,13 @@ tasa-distorsión satisface
 
 $$R(D) \;\geq\; \frac{H(X)}{n} - H_b(D)$$
 
-donde $H_b$ es la entropía binaria. Despejando la distorsión:
+donde $$H_b$$ es la entropía binaria. Despejando la distorsión:
 
 $$D \;\geq\; H_b^{-1}\!\left(\frac{H(X)}{n} - R\right)$$
 
 Esta cota vale para **cualquier** fuente estacionaria binaria, no solo i.i.d.,
 por lo que se aplica uniformemente a las cinco fuentes del estudio. Se implementa
-en `slb()` invirtiendo $H_b$ por bisección en la rama $[0, 0.5]$.
+en `slb()` invirtiendo $$H_b$$ por bisección en la rama $$[0, 0.5]$$.
 
 Consecuencia operativa: si un experimento reporta un BER por debajo de esta
 línea, **tiene un bug** — típicamente fuga entre entrenamiento y prueba, o una
@@ -47,11 +47,11 @@ cualquier otra cosa.
 | `random` | 500.0 | 1.000 | trivial: 500 bits i.i.d. |
 | `code` | 250.0 | 0.500 | 250 bits sistemáticos; las paridades son deterministas |
 | `lowdim` | 164.9 | 0.330 | conteo de dicotomías de Cover (1965) |
-| `markov` | 143.9 | 0.288 | $1 + (n-1) H_b(p)$ con $p = 0.05$ |
+| `markov` | 143.9 | 0.288 | $$1 + (n-1) H_b(p)$$ con $$p = 0.05$$ |
 | `oversamp` | 125.0 | 0.250 | 125 símbolos, cada uno repetido 4 veces |
 
-El caso de `lowdim` merece atención. La fuente es $x = \mathrm{sign}(Wz)$ con
-$z \in \mathbb{R}^{32}$, y la intuición ingenua sugiere que su entropía son 32
+El caso de `lowdim` merece atención. La fuente es $$x = \mathrm{sign}(Wz)$$ con
+$$z \in \mathbb{R}^{32}$$, y la intuición ingenua sugiere que su entropía son 32
 bits. Es falso: lo que importa es **cuántos vectores de signos distintos** puede
 producir, es decir el número de dicotomías linealmente separables de 500 puntos
 en 32 dimensiones,
@@ -96,9 +96,9 @@ diferencia se reporta como resultado en sí misma.
 
 En un enlace real el autoencoder no sería la última etapa: iría seguido de un
 código corrector de errores. Con codificación moderna (LDPC, turbo), un BER
-**previo a la decodificación** del orden de $10^{-2}$ se corrige hasta
+**previo a la decodificación** del orden de $$10^{-2}$$ se corrige hasta
 esencialmente libre de errores. Sin código externo, los objetivos habituales
-están entre $10^{-3}$ y $10^{-6}$.
+están entre $$10^{-3}$$ y $$10^{-6}$$.
 
 Por eso el arnés reporta, además del BER, el **BER restringido a los bits más
 confiables**. El decoder emite logits que funcionan como razones de verosimilitud

@@ -25,7 +25,7 @@ memorizar.
   receptor.
 - **`markov`** — cadena de Markov con probabilidad de transición 0.05.
   Redundancia correlacional.
-- **`lowdim`** — $\mathrm{sign}(Wz)$ con $z \in \mathbb{R}^{32}$. Redundancia
+- **`lowdim`** — $$\mathrm{sign}(Wz)$$ con $$z \in \mathbb{R}^{32}$$. Redundancia
   geométrica: la fuente vive en un manifold de baja dimensión.
 - **`code`** — código lineal sistemático de tasa 1/2 sobre GF(2), con checks de
   grado 3. Redundancia algebraica, el caso crítico.
@@ -49,11 +49,11 @@ código binario de la anterior, con ajuste fino extremo a extremo posterior.
 La vara. Todos usan **el mismo número de bits** que el autoencoder.
 
 **PCA + cuantización uniforme.** El competidor justo: aprendido de datos, sin
-oráculo, sin red neuronal. Se prueban combinaciones de $d$ componentes por $b$
-bits tales que $d \cdot b = L$, y se reporta la mejor. La eigendescomposición se
+oráculo, sin red neuronal. Se prueban combinaciones de $$d$$ componentes por $$b$$
+bits tales que $$d \cdot b = L$$, y se reporta la mejor. La eigendescomposición se
 calcula una sola vez por fuente.
 
-**Decimación.** Envía 1 de cada $m$ símbolos. Se evalúan **dos**
+**Decimación.** Envía 1 de cada $$m$$ símbolos. Se evalúan **dos**
 reconstrucciones: *sample-and-hold* y *vecino más cercano*. La distinción
 importa: sobre `oversamp` a 125 bits, hold da BER = 0.0000 y vecino da 0.1241.
 Usar solo vecino subestimaría la vara y haría parecer ganador a un autoencoder
@@ -62,14 +62,14 @@ que en realidad pierde.
 **Oráculos.** Cotas superiores de lo alcanzable con conocimiento perfecto de la
 estructura. Sobre `code`, un oráculo que conoce la matriz de paridad transmite
 los 250 bits sistemáticos y recalcula las paridades: BER exactamente 0 a tasa
-0.5. Sobre `lowdim`, un oráculo que conoce $W$ transmite $z$ cuantizado.
+0.5. Sobre `lowdim`, un oráculo que conoce $$W$$ transmite $$z$$ cuantizado.
 
 ## Métricas
 
-**BER** — fracción de posiciones donde $\mathrm{sign}(\hat{x}) \neq x$.
+**BER** — fracción de posiciones donde $$\mathrm{sign}(\hat{x}) \neq x$$.
 
 **BER por confianza** — BER restringido al 50 % y al 90 % de los bits con mayor
-$|$logit$|$. Aproxima lo que conseguiría un FEC de decisión blanda.
+$$|$$logit$$|$$. Aproxima lo que conseguiría un FEC de decisión blanda.
 
 **Brecha entrenamiento/prueba** — sobre `random` debe ser grande y positiva: la
 red memoriza el conjunto de entrenamiento pero no puede generalizar, que es

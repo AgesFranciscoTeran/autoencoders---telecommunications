@@ -111,10 +111,14 @@ La diferencia cae dentro de 1 sigma en los cuatro escalones.
 ![PCA es ciego al código de bloque](figs/pca_ciego.png)
 
 La redundancia de un código de bloque vive en operaciones XOR de grado 3 sobre
-GF(2), y PCA es una estadística de segundo orden. La hipótesis abierta del
-proyecto es que **el descenso de gradiente comparte esa ceguera**, lo que
-tendría consecuencias directas para aplicar autoencoders sobre señales ya
-codificadas de canal.
+GF(2), y PCA es una estadística de segundo orden.
+
+El autoencoder falla igual, pero **por una razón distinta a la que supusimos**.
+La hipótesis inicial —que el descenso de gradiente no aprende XOR de grado
+alto— fue **refutada** por el diagnóstico: un MLP alcanza acc_test = 1.0000 con
+grado 3 sobre 500 bits. Lo que falla es que la pérdida de reconstrucción no
+genera un camino de gradiente hacia esa estructura. Detalle en
+[Resultados](docs/03-resultados.md).
 
 ---
 

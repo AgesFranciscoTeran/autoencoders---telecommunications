@@ -13,17 +13,17 @@ aquí y dónde importa.
 ## Métricas y magnitudes
 
 **BER** (*bit error rate*) — Fracción de posiciones donde el signo reconstruido
-no coincide con el original: $\mathrm{BER} = \frac{1}{n}\sum \mathbb{1}[\mathrm{sign}(\hat{x}_i) \neq x_i]$.
+no coincide con el original: $$\mathrm{BER} = \frac{1}{n}\sum \mathbb{1}[\mathrm{sign}(\hat{x}_i) \neq x_i]$$.
 Es la métrica central. BER = 0.5 equivale a adivinar al azar; BER = 0 es
 reconstrucción perfecta.
 
-**Tasa** ($R$) — Bits del latente dividido entre 500. Es el eje horizontal de
-todas las figuras. $R = 1$ significa no comprimir; $R = 0.07$ (35 bits) es
+**Tasa** ($$R$$) — Bits del latente dividido entre 500. Es el eje horizontal de
+todas las figuras. $$R = 1$$ significa no comprimir; $$R = 0.07$$ (35 bits) es
 compresión 14×.
 
-**Compresión** — El inverso: $500 / L$. Un latente de 125 bits es compresión 4×.
+**Compresión** — El inverso: $$500 / L$$. Un latente de 125 bits es compresión 4×.
 
-**Entropía** ($H$) — Bits mínimos necesarios para representar la fuente sin
+**Entropía** ($$H$$) — Bits mínimos necesarios para representar la fuente sin
 pérdida. Se calcula analíticamente para cada fuente, no se estima.
 
 **Eb/N0** — Energía por bit dividida entre densidad de ruido. La medida estándar
@@ -34,11 +34,11 @@ de calidad de canal en telecomunicaciones. Aparece en la etapa JSCC.
 ## Conceptos de teoría de la información
 
 **Cota inferior de Shannon (SLB)** — El BER mínimo físicamente alcanzable a una
-tasa dada: $D \geq H_b^{-1}(H/n - R)$. **Ningún algoritmo puede bajar de ahí.**
+tasa dada: $$D \geq H_b^{-1}(H/n - R)$$. **Ningún algoritmo puede bajar de ahí.**
 Si un experimento la viola, tiene un bug — típicamente fuga entre entrenamiento
 y prueba. Es la línea punteada negra de las figuras.
 
-**Entropía binaria** ($H_b$) — $H_b(p) = -p\log_2 p - (1-p)\log_2(1-p)$. Se
+**Entropía binaria** ($$H_b$$) — $$H_b(p) = -p\log_2 p - (1-p)\log_2(1-p)$$. Se
 invierte por bisección para despejar el BER de la cota.
 
 **i.i.d.** — Independiente e idénticamente distribuido. Bits i.i.d. uniformes
@@ -76,21 +76,21 @@ superior de lo alcanzable, que demuestra que la redundancia existe.
 
 ## Las cinco fuentes
 
-**`random`** — Bits i.i.d. uniformes. $H = 500$ bits. Control negativo:
+**`random`** — Bits i.i.d. uniformes. $$H = 500$$ bits. Control negativo:
 incompresible por Shannon.
 
-**`oversamp`** — 125 símbolos, cada uno repetido 4 veces. $H = 125$ bits. Modela
+**`oversamp`** — 125 símbolos, cada uno repetido 4 veces. $$H = 125$$ bits. Modela
 una señal sobremuestreada antes de diezmar. Es el caso fácil, usado para
 calibrar.
 
-**`markov`** — Cadena de Markov con probabilidad de transición 0.05. $H = 143.9$
+**`markov`** — Cadena de Markov con probabilidad de transición 0.05. $$H = 143.9$$
 bits. Redundancia **correlacional**.
 
-**`lowdim`** — $\mathrm{sign}(Wz)$ con $z \in \mathbb{R}^{32}$. $H = 164.9$ bits
+**`lowdim`** — $$\mathrm{sign}(Wz)$$ con $$z \in \mathbb{R}^{32}$$. $$H = 164.9$$ bits
 (no 32 — ver *conteo de Cover*). Redundancia **geométrica**.
 
 **`code`** — Código lineal sistemático de tasa 1/2 sobre GF(2) con checks de
-grado 3. $H = 250$ bits. Redundancia **algebraica**. El caso crítico.
+grado 3. $$H = 250$$ bits. Redundancia **algebraica**. El caso crítico.
 
 **GF(2)** — El cuerpo de dos elementos. Aritmética módulo 2, donde la suma es el
 XOR.
@@ -98,7 +98,7 @@ XOR.
 **Check de grado 3** — Cada bit de paridad es el XOR de 3 bits de información.
 La clave del proyecto: esa dependencia es invisible para métodos lineales.
 
-**Conteo de Cover** — $C(n,k) = 2\sum_{i<k}\binom{n-1}{i}$, el número de
+**Conteo de Cover** — $$C(n,k) = 2\sum_{i<k}\binom{n-1}{i}$$, el número de
 dicotomías linealmente separables. Da la entropía real de `lowdim`: 164.9 bits,
 no los 32 que sugiere la dimensión del manifold.
 
@@ -135,10 +135,10 @@ hiperbólica se sature y mate el gradiente.
 salida se pega a ±1 y su derivada se va a cero. El gradiente deja de fluir y la
 red no aprende.
 
-**PCA + cuantización** — El competidor justo: proyecta a $d$ componentes
-principales y cuantiza cada una a $b$ bits, con $d \cdot b = L$.
+**PCA + cuantización** — El competidor justo: proyecta a $$d$$ componentes
+principales y cuantiza cada una a $$b$$ bits, con $$d \cdot b = L$$.
 
-**Decimación** — Enviar 1 de cada $m$ símbolos. Dos reconstrucciones:
+**Decimación** — Enviar 1 de cada $$m$$ símbolos. Dos reconstrucciones:
 
 - *hold* (sample-and-hold): repite el último valor transmitido.
 - *vecino*: usa el transmitido más cercano.
@@ -150,8 +150,8 @@ La distinción importa: sobre `oversamp` a 125 bits, hold da 0.0000 y vecino
 canal: comprimir y proteger contra ruido en un solo paso.
 
 **FEC** (*forward error correction*) — Código corrector de errores. Con LDPC o
-turbo, un BER previo del orden de $10^{-2}$ se corrige hasta esencialmente cero.
-Por eso $10^{-2}$ aparece como umbral en las figuras.
+turbo, un BER previo del orden de $$10^{-2}$$ se corrige hasta esencialmente cero.
+Por eso $$10^{-2}$$ aparece como umbral en las figuras.
 
 **LLR** (*log-likelihood ratio*) — Medida de confianza por bit. Los logits del
 decoder funcionan como LLR: si los errores se concentran en bits de baja
