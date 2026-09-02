@@ -1,0 +1,78 @@
+CONFIG: {"dim": 500, "k": 32, "markov_p": 0.05, "hidden": 384, "lr": 0.002, "seed": 0, "device": "cpu", "outdir": "/home/claude/ae_results_v2", "regimes": ["random", "lowdim", "code", "markov"], "archs": ["deep", "linear"], "jscc_regimes": ["markov", "random"], "ebn0_grid": [-2, 0, 2, 4, 6, 8, 10], "train_ebn0": 4.0, "n_train": 16000, "n_test": 5000, "epochs": 40, "batch": 1024, "latents": [250, 128, 64, 32], "abl_latent": 128, "jscc_latents": [128]}
+
+ENTROPIA DE CADA FUENTE (dim=500):
+  random : H =   500.0 bits  -> tasa minima sin perdida = 1.000 bits/bit  (compresion max 1.00x)
+  lowdim : H =   164.9 bits  -> tasa minima sin perdida = 0.330 bits/bit  (compresion max 3.03x)
+  code   : H =   250.0 bits  -> tasa minima sin perdida = 0.500 bits/bit  (compresion max 2.00x)
+  markov : H =   143.9 bits  -> tasa minima sin perdida = 0.288 bits/bit  (compresion max 3.47x)
+
+============================================================================
+ETAPA A - ABLACION: perdida y tipo de latente
+============================================================================
+  lowdim  | continuous | mse | bits= 4096 ( 0.12x) | test_BER=0.0390
+  lowdim  | continuous | bce | bits= 4096 ( 0.12x) | test_BER=0.0387
+  lowdim  | binary     | mse | bits=  128 ( 3.91x) | test_BER=0.1107
+  lowdim  | binary     | bce | bits=  128 ( 3.91x) | test_BER=0.1116
+  code    | continuous | mse | bits= 4096 ( 0.12x) | test_BER=0.3003
+  code    | continuous | bce | bits= 4096 ( 0.12x) | test_BER=0.3082
+  code    | binary     | mse | bits=  128 ( 3.91x) | test_BER=0.3660
+  code    | binary     | bce | bits=  128 ( 3.91x) | test_BER=0.3602
+[guardado] /home/claude/ae_results_v2/v2_ablacion.png
+
+============================================================================
+ETAPA B - BARRIDO: BER vs TASA REAL (latente binario)
+============================================================================
+
+  --- fuente 'random': entropia = 500.0 bits de 500 (tasa minima sin perdida = 1.000 bits/bit) ---
+    deep   | L= 250 bits ( 2.00x) | R=0.500 | test_BER=0.3303 | train_BER=0.3036
+    deep   | L= 128 bits ( 3.91x) | R=0.256 | test_BER=0.3590 | train_BER=0.3334
+    deep   | L=  64 bits ( 7.81x) | R=0.128 | test_BER=0.3938 | train_BER=0.3660
+    deep   | L=  32 bits (15.62x) | R=0.064 | test_BER=0.4277 | train_BER=0.3949
+    linear | L= 250 bits ( 2.00x) | R=0.500 | test_BER=0.2497 | train_BER=0.2227
+    linear | L= 128 bits ( 3.91x) | R=0.256 | test_BER=0.3311 | train_BER=0.3101
+    linear | L=  64 bits ( 7.81x) | R=0.128 | test_BER=0.3838 | train_BER=0.3686
+    linear | L=  32 bits (15.62x) | R=0.064 | test_BER=0.4194 | train_BER=0.4084
+
+  --- fuente 'lowdim': entropia = 164.9 bits de 500 (tasa minima sin perdida = 0.330 bits/bit) ---
+    deep   | L= 250 bits ( 2.00x) | R=0.500 | test_BER=0.0840 | train_BER=0.0606
+    deep   | L= 128 bits ( 3.91x) | R=0.256 | test_BER=0.1116 | train_BER=0.0874
+    deep   | L=  64 bits ( 7.81x) | R=0.128 | test_BER=0.1594 | train_BER=0.1403
+    deep   | L=  32 bits (15.62x) | R=0.064 | test_BER=0.2103 | train_BER=0.1983
+    linear | L= 250 bits ( 2.00x) | R=0.500 | test_BER=0.0718 | train_BER=0.0510
+    linear | L= 128 bits ( 3.91x) | R=0.256 | test_BER=0.1047 | train_BER=0.0896
+    linear | L=  64 bits ( 7.81x) | R=0.128 | test_BER=0.1458 | train_BER=0.1385
+    linear | L=  32 bits (15.62x) | R=0.064 | test_BER=0.2002 | train_BER=0.1973
+
+  --- fuente 'code': entropia = 250.0 bits de 500 (tasa minima sin perdida = 0.500 bits/bit) ---
+    deep   | L= 250 bits ( 2.00x) | R=0.500 | test_BER=0.3326 | train_BER=0.3063
+    deep   | L= 128 bits ( 3.91x) | R=0.256 | test_BER=0.3602 | train_BER=0.3343
+    deep   | L=  64 bits ( 7.81x) | R=0.128 | test_BER=0.3932 | train_BER=0.3670
+    deep   | L=  32 bits (15.62x) | R=0.064 | test_BER=0.4277 | train_BER=0.3945
+    linear | L= 250 bits ( 2.00x) | R=0.500 | test_BER=0.2501 | train_BER=0.2229
+    linear | L= 128 bits ( 3.91x) | R=0.256 | test_BER=0.3318 | train_BER=0.3101
+    linear | L=  64 bits ( 7.81x) | R=0.128 | test_BER=0.3844 | train_BER=0.3686
+    linear | L=  32 bits (15.62x) | R=0.064 | test_BER=0.4189 | train_BER=0.4084
+
+  --- fuente 'markov': entropia = 143.9 bits de 500 (tasa minima sin perdida = 0.288 bits/bit) ---
+    deep   | L= 250 bits ( 2.00x) | R=0.500 | test_BER=0.1035 | train_BER=0.0928
+    deep   | L= 128 bits ( 3.91x) | R=0.256 | test_BER=0.1224 | train_BER=0.1106
+    deep   | L=  64 bits ( 7.81x) | R=0.128 | test_BER=0.1485 | train_BER=0.1375
+    deep   | L=  32 bits (15.62x) | R=0.064 | test_BER=0.1790 | train_BER=0.1738
+    linear | L= 250 bits ( 2.00x) | R=0.500 | test_BER=0.0457 | train_BER=0.0355
+    linear | L= 128 bits ( 3.91x) | R=0.256 | test_BER=0.0797 | train_BER=0.0711
+    linear | L=  64 bits ( 7.81x) | R=0.128 | test_BER=0.1281 | train_BER=0.1225
+    linear | L=  32 bits (15.62x) | R=0.064 | test_BER=0.1861 | train_BER=0.1836
+[guardado] /home/claude/ae_results_v2/v2_ber_vs_tasa.png
+[guardado] /home/claude/ae_results_v2/v2_random_vs_shannon.png
+[guardado] /home/claude/ae_results_v2/v2_lineal_vs_profundo.png
+
+============================================================================
+ETAPA C - JSCC: BER vs Eb/N0 sobre canal AWGN
+============================================================================
+  markov  L=128 (sin canal  ) -> -2dB:0.1371  0dB:0.1318  2dB:0.1285  4dB:0.1262  6dB:0.1248  8dB:0.1240  10dB:0.1234
+  markov  L=128 (canal-aware) -> -2dB:0.1381  0dB:0.1330  2dB:0.1300  4dB:0.1278  6dB:0.1266  8dB:0.1256  10dB:0.1252
+  random  L=128 (sin canal  ) -> -2dB:0.3710  0dB:0.3669  2dB:0.3641  4dB:0.3623  6dB:0.3611  8dB:0.3603  10dB:0.3598
+  random  L=128 (canal-aware) -> -2dB:0.3719  0dB:0.3681  2dB:0.3654  4dB:0.3638  6dB:0.3626  8dB:0.3620  10dB:0.3615
+[guardado] /home/claude/ae_results_v2/v2_jscc_ebn0.png
+
+Tiempo total: 1011.0s   (salidas en /home/claude/ae_results_v2)

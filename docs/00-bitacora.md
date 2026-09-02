@@ -232,6 +232,104 @@ Si hubiera que resumir el proyecto en una frase por etapa:
 11. La redundancia del latente es capacidad excedente, no codificación.
 12. La estructura algebraica es aprendible con supervisión; lo que falla es que
     la reconstrucción no lleve hasta ella.
+13. Un resultado negativo con presupuesto corto es indistinguible de uno real:
+    hay que volver a medirlo con margen antes de creerlo.
+
+---
+
+## Anexo: las versiones intermedias (v2 y v3)
+
+Antes del arnés definitivo hubo dos pilotos en CPU (16 000 muestras, 40 épocas,
+capas de 384). Se conservan porque **dos de sus conclusiones fueron revertidas
+después**, y en ambos casos se puede identificar la causa. Un piloto que acierta
+no enseña nada; uno que se equivoca de forma diagnosticable, sí.
+
+### v2 — ablación, barrido binario y primer intento de JSCC
+
+**Lo que estableció y sobrevivió:** el coste real del latente continuo. Con 128
+dimensiones en `float32` el latente ocupa **4096 bits** para 500 bits de fuente
+— una *expansión* de 0.12×, no una compresión. El BER era mejor (0.039 frente a
+0.111 en `lowdim`) precisamente porque estaba gastando 32 veces más bits. Esa
+tabla es el origen de la decisión de usar latente binario en todo el proyecto.
+
+| fuente | latente | bits reales | compresión | BER test |
+|---|---|---|---|---|
+| lowdim | continuo (128 dim) | 4096 | 0.12× | 0.0390 |
+| lowdim | binario (128 bits) | 128 | 3.91× | 0.1107 |
+| code | continuo (128 dim) | 4096 | 0.12× | 0.3003 |
+| code | binario (128 bits) | 128 | 3.91× | 0.3660 |
+
+**Conclusión revertida: «el autoencoder lineal le gana al profundo».** En v2 el
+lineal ganaba en **15 de 16** configuraciones, a veces por mucho (`markov`
+L=250: 0.0457 frente a 0.1035). Se interpretó como confirmación de Baldi y
+Hornik.
+
+Era un **artefacto de la inestabilidad de escala**, diagnosticada mucho después.
+El modelo profundo de v2 usaba `tanh` antes de binarizar, exactamente la
+configuración que en `gate_test3` diverge; el lineal, con muchos menos
+parámetros, sufría menos. Con el encoder corregido el profundo gana a ambos:
+
+| caso | v2 profundo | v2 lineal | v4 corregido |
+|---|---|---|---|
+| markov L=250 | 0.1035 | 0.0457 | **0.0344** |
+| markov L=125 | 0.1224 | 0.0797 | **0.0503** |
+| lowdim L=250 | 0.0840 | 0.0718 | **0.0510** |
+| lowdim L=125 | 0.1116 | 0.1047 | **0.0618** |
+
+La comparación está confundida —v4 tiene además más datos, más capas y más
+épocas—, pero el control limpio existe: en `gate_test3`, a igual escala, `tanh`
+diverge y `BatchNorm1d(affine=False)` no.
+
+**Primer JSCC, fallido.** Las curvas de BER frente a Eb/N0 salieron planas
+(`markov` L=128 va de 0.1371 a 0.1234 entre −2 y 10 dB). El piso de distorsión
+de la compresión tapaba por completo el efecto del canal. De ahí salió la
+corrección de reportar el **exceso** sobre el piso sin ruido en lugar del BER
+total.
+
+### v3 — baselines clásicos, cotas y diagnóstico de paridad
+
+**Lo que estableció y sobrevivió:** que hacen falta una vara y un piso. Aquí
+aparecieron por primera vez PCA con cuantización, la decimación, los oráculos y
+la cota inferior de Shannon. También el oráculo de `code` alcanzando **BER
+0.0000 a tasa 0.500**, que es el pilar del resultado negativo.
+
+**Conclusión revertida: «un MLP no aprende paridad de grado ≥ 3».**
+
+| grado | v3 piloto (acc_test) | cierre final (acc_test) |
+|---|---|---|
+| 1 | 1.0000 | 1.0000 |
+| 2 | 1.0000 | 1.0000 |
+| **3** | **0.5069 — azar** | **1.0000 — aprende** |
+| 4 | 0.4931 — azar | 0.4995 — azar |
+
+Grado 3 es exactamente el de los checks del código, así que este resultado se
+tomó como la explicación del fracaso sobre `code`. La figura de v3 lo dice en su
+propio título: *«Un MLP no aprende paridad de grado alto (por eso el AE no ve la
+redundancia algebraica)»*.
+
+La diferencia entre las dos corridas es **presupuesto de entrenamiento**:
+
+| | v3 piloto | cierre final |
+|---|---|---|
+| muestras | 60 000 | 400 000 |
+| épocas | 25 | 60 |
+| pasos aproximados | 2 925 | 23 400 |
+
+Con ocho veces más pasos, grado 3 pasa de azar a exactitud perfecta. **El
+"fracaso" era subentrenamiento, no una barrera de aprendibilidad.** Y la
+consecuencia va más allá de este punto: un resultado negativo obtenido con
+presupuesto insuficiente es indistinguible de uno real, y solo se detecta
+volviéndolo a medir con margen.
+
+### Qué se llevó de aquí al arnés definitivo
+
+- Latente binario con estimador straight-through (de la ablación de v2).
+- Baselines clásicos y cotas de Shannon como referencias obligatorias (de v3).
+- Oráculos como demostración de que la redundancia es explotable (de v3).
+- Reportar el exceso sobre el piso en JSCC, no el BER total (del fallo de v2).
+- Y, con el diario, dos recordatorios: que una conclusión puede ser artefacto de
+  una inestabilidad no diagnosticada, y que un resultado negativo puede ser
+  artefacto de un presupuesto corto.
 
 ---
 
@@ -327,6 +425,6 @@ Los tres refutaron afirmaciones previas. Es lo que se esperaba de ellos.
   desde 400k. El 14.5 % que atribuí a "más datos" venía de **más pasos**: con
   épocas fijas, duplicar los datos duplicaba las actualizaciones.
 
-Ver [Hacia un paper](07-hacia-paper.html) para lo que queda abierto.
+Ver [Hacia un paper](07-hacia-paper.md) para lo que queda abierto.
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/MathJax.js?config=TeX-MML-AM_CHTML" async></script>

@@ -18,18 +18,18 @@ todo desde cero.
 
 Si vengo a retomar esto después de un tiempo:
 
-1. **[Bitácora](docs/00-bitacora.html)** — el camino completo, etapa por etapa:
+1. **[Bitácora](docs/00-bitacora.md)** — el camino completo, etapa por etapa:
    qué creíamos, qué lo rompió, qué cambiamos. Es la página que reconstruye todo
    el razonamiento.
-2. **[Glosario](docs/06-glosario.html)** — cada término, con la definición que se
+2. **[Glosario](docs/06-glosario.md)** — cada término, con la definición que se
    usa aquí. Incluye la mecánica de ejecución (shards, gate test, JSONL).
-3. **[Resultados](docs/03-resultados.html)** — qué está firme y qué no.
+3. **[Resultados](docs/03-resultados.md)** — qué está firme y qué no.
 
-Referencia: [Teoría](docs/01-teoria.html) ·
-[Metodología](docs/02-metodologia.html) ·
-[Bibliografía](docs/04-bibliografia.html) ·
-[Reproducir](docs/05-reproducir.html) ·
-[Hacia un paper](docs/07-hacia-paper.html)
+Referencia: [Teoría](docs/01-teoria.md) ·
+[Metodología](docs/02-metodologia.md) ·
+[Bibliografía](docs/04-bibliografia.md) ·
+[Reproducir](docs/05-reproducir.md) ·
+[Hacia un paper](docs/07-hacia-paper.md)
 
 ---
 
@@ -130,4 +130,4 @@ python3 code/generar_tablas.py     # sin GPU, segundos
 ```
 
 Los resultados firmes se regeneran con NumPy y semillas fijas, sin redes
-neuronales. Detalle y nivel con GPU en [Reproducir](docs/05-reproducir.html).
+neuronales. Detalle y nivel con GPU en [Reproducir](docs/05-reproducir.md).

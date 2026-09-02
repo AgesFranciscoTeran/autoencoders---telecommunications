@@ -1,11 +1,7 @@
 __pycache__/
 *.pyc
 *.bak
-*.bak2
-*.bak3
 res/
-res_s*/
 ae_results*/
-cierre/
 _site/
 .jekyll-cache/

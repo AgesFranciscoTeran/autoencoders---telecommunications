@@ -1,0 +1,86 @@
+regime,metodo,rate,ber,bits
+random,PCA d=8 b=1,0.016,0.4605972,8
+random,PCA d=8 b=2,0.032,0.4599588,16
+random,PCA d=8 b=4,0.064,0.4518004,32
+random,PCA d=16 b=1,0.032,0.4438176,16
+random,PCA d=16 b=2,0.064,0.4426924,32
+random,PCA d=16 b=4,0.128,0.4300936,64
+random,PCA d=32 b=1,0.064,0.4195888,32
+random,PCA d=32 b=2,0.128,0.417884,64
+random,PCA d=32 b=4,0.256,0.3986576,128
+random,PCA d=64 b=1,0.128,0.3850592,64
+random,PCA d=64 b=2,0.256,0.3823688,128
+random,PCA d=64 b=4,0.512,0.353686,256
+random,PCA d=128 b=1,0.256,0.3325808,128
+random,PCA d=128 b=2,0.512,0.3281804,256
+random,PCA d=128 b=4,1.024,0.2824172,512
+random,PCA d=250 b=1,0.5,0.2522304,250
+random,PCA d=250 b=2,1.0,0.2428108,500
+lowdim,PCA d=8 b=1,0.016,0.3435016,8
+lowdim,PCA d=8 b=2,0.032,0.3363992,16
+lowdim,PCA d=8 b=4,0.064,0.3053848,32
+lowdim,PCA d=16 b=1,0.032,0.2809572,16
+lowdim,PCA d=16 b=2,0.064,0.2687996,32
+lowdim,PCA d=16 b=4,0.128,0.2125904,64
+lowdim,PCA d=32 b=1,0.064,0.1971976,32
+lowdim,PCA d=32 b=2,0.128,0.1769944,64
+lowdim,PCA d=32 b=4,0.256,0.0476344,128
+lowdim,PCA d=64 b=1,0.128,0.1901256,64
+lowdim,PCA d=64 b=2,0.256,0.1695692,128
+lowdim,PCA d=64 b=4,0.512,0.0464356,256
+lowdim,PCA d=128 b=1,0.256,0.1755732,128
+lowdim,PCA d=128 b=2,0.512,0.1547752,256
+lowdim,PCA d=128 b=4,1.024,0.0371064,512
+lowdim,PCA d=250 b=1,0.5,0.1492328,250
+lowdim,PCA d=250 b=2,1.0,0.1266084,500
+lowdim,oraculo z b=1,0.064,0.2019828,32
+lowdim,oraculo z b=2,0.128,0.1477792,64
+lowdim,oraculo z b=3,0.192,0.0678656,96
+lowdim,oraculo z b=4,0.256,0.0330472,128
+lowdim,oraculo z b=6,0.384,0.0105576,192
+lowdim,oraculo z b=8,0.512,0.0056768,256
+code,PCA d=8 b=1,0.016,0.4601192,8
+code,PCA d=8 b=2,0.032,0.459758,16
+code,PCA d=8 b=4,0.064,0.451328,32
+code,PCA d=16 b=1,0.032,0.4437776,16
+code,PCA d=16 b=2,0.064,0.4430508,32
+code,PCA d=16 b=4,0.128,0.430202,64
+code,PCA d=32 b=1,0.064,0.4202012,32
+code,PCA d=32 b=2,0.128,0.418648,64
+code,PCA d=32 b=4,0.256,0.3995396,128
+code,PCA d=64 b=1,0.128,0.38638,64
+code,PCA d=64 b=2,0.256,0.3830464,128
+code,PCA d=64 b=4,0.512,0.353752,256
+code,PCA d=128 b=1,0.256,0.3338628,128
+code,PCA d=128 b=2,0.512,0.328658,256
+code,PCA d=128 b=4,1.024,0.2830172,512
+code,PCA d=250 b=1,0.5,0.253134,250
+code,PCA d=250 b=2,1.0,0.2437408,500
+code,oraculo frac=1.0,0.5,0.0,250
+code,oraculo frac=0.75,0.376,0.2147476,188
+code,oraculo frac=0.5,0.25,0.3514344,125
+code,oraculo frac=0.25,0.124,0.43451,62
+markov,PCA d=8 b=1,0.016,0.3179044,8
+markov,PCA d=8 b=2,0.032,0.3097656,16
+markov,PCA d=8 b=4,0.064,0.2733244,32
+markov,PCA d=16 b=1,0.032,0.2504428,16
+markov,PCA d=16 b=2,0.064,0.2370712,32
+markov,PCA d=16 b=4,0.128,0.1786684,64
+markov,PCA d=32 b=1,0.064,0.1880424,32
+markov,PCA d=32 b=2,0.128,0.1706996,64
+markov,PCA d=32 b=4,0.256,0.0925988,128
+markov,PCA d=64 b=1,0.128,0.145668,64
+markov,PCA d=64 b=2,0.256,0.1248896,128
+markov,PCA d=64 b=4,0.512,0.039244,256
+markov,PCA d=128 b=1,0.256,0.1224492,128
+markov,PCA d=128 b=2,0.512,0.0991796,256
+markov,PCA d=128 b=4,1.024,0.0118744,512
+markov,PCA d=250 b=1,0.5,0.1096016,250
+markov,PCA d=250 b=2,1.0,0.0851092,500
+markov,decimacion m=2,0.5,0.025038,250
+markov,decimacion m=3,0.334,0.0332848,167
+markov,decimacion m=4,0.25,0.0490796,125
+markov,decimacion m=6,0.168,0.0707436,84
+markov,decimacion m=8,0.126,0.0916948,63
+markov,decimacion m=12,0.084,0.1292336,42
+markov,decimacion m=16,0.064,0.1603604,32

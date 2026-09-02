@@ -117,6 +117,12 @@ alto. **El diagnóstico la refutó:** con 500 bits de entrada y grado 3, un MLP
 alcanza acc_test = 1.0000. Solo falla en grado 4 (acc_test 0.4995, con acc_train
 1.0 — memoriza sin generalizar), y la fuente usa grado 3.
 
+Conviene registrar que **un piloto anterior la había confirmado**: con 60 000
+muestras y 25 épocas, el grado 3 daba acc_test = 0.5069, azar puro. La
+diferencia con la corrida final son ocho veces más pasos de entrenamiento. Un
+resultado negativo obtenido con presupuesto insuficiente es indistinguible de
+uno real; el detalle está en la [bitácora](00-bitacora.md).
+
 La diferencia entre el diagnóstico y el autoencoder es la **supervisión**. El
 diagnóstico recibe una etiqueta que *es* la paridad, y el gradiente apunta
 directamente a ella. El autoencoder solo tiene pérdida de reconstrucción, y debe
