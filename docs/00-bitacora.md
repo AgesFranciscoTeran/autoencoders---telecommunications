@@ -190,13 +190,10 @@ preactivaciones crecen más.
 recorte del straight-through ya acota el gradiente sin necesidad de la
 tangente hiperbólica.
 
-**Estado.** Test en ejecución. Tres desenlaces posibles:
-
-| Resultado | Significado | Siguiente paso |
-|---|---|---|
-| Normalización aprueba, `tanh` reprueba | diagnóstico correcto | relanzar el barrido con la corrección |
-| Ambas aprueban | la saturación no era el problema | buscar el fallo en otro lado |
-| Ninguna aprueba | problema más profundo | bajar la tasa de aprendizaje, más épocas, revisar el decoder |
+**Desenlace.** La hipótesis de la saturación resultó **falsa**, pero el test
+destapó el modo de fallo real: la inestabilidad de escala del latente binario,
+con su mecanismo confirmado por medición. El detalle está en el registro
+fechado, más abajo.
 
 ---
 
@@ -209,7 +206,12 @@ tangente hiperbólica.
 - Que PCA es **ciego a la redundancia algebraica**: su BER sobre un código de
   bloque 2× comprimible es indistinguible de su BER sobre ruido puro.
 
-**No firme:** todo el barrido de autoencoders, hasta que pase la calibración.
+**Firme tras el cierre:** el barrido de autoencoders, con calibración aprobada
+y cuatro semillas; la correspondencia arquitectura–estructura; y la
+inestabilidad de escala con su mecanismo medido.
+
+**Abierto:** las extensiones de [Hacia un paper](07-hacia-paper.md), encabezadas
+por un objetivo auxiliar que supervise la estructura algebraica.
 
 ---
 
@@ -237,12 +239,58 @@ Si hubiera que resumir el proyecto en una frase por etapa:
 
 ---
 
-## Anexo: las versiones intermedias (v2 y v3)
+## Anexo: las versiones previas (v1, v2 y v3)
 
-Antes del arnés definitivo hubo dos pilotos en CPU (16 000 muestras, 40 épocas,
-capas de 384). Se conservan porque **dos de sus conclusiones fueron revertidas
+Antes del arnés definitivo hubo tres versiones, todas en CPU y a escala
+pequeña. Se conservan porque **dos de sus conclusiones fueron revertidas
 después**, y en ambos casos se puede identificar la causa. Un piloto que acierta
 no enseña nada; uno que se equivoca de forma diagnosticable, sí.
+
+### v1 — el primer arnés, con latente continuo
+
+Dos fuentes (`random`, `lowdim`), dos arquitecturas, latente **continuo** en
+`float32`, pérdida MSE, 4 000 muestras y 100 épocas en CPU.
+
+**Lo que estableció y orientó todo el proyecto:** que la compresibilidad es
+propiedad de la señal. Sobre `random` el BER de test sube hacia 0.5 al comprimir
+y aparece una brecha enorme entre entrenamiento y prueba (L=200: train 0.0663,
+test 0.2639) — la red memoriza pero no generaliza, que es la firma de una fuente
+sin estructura explotable. Sobre `lowdim` el BER colapsa por debajo de L≈32, la
+dimensión intrínseca del generador.
+
+**Error de encuadre, corregido en la misma sesión.** El primer resumen decía
+«`lowdim` 500 → 50, compresión 10× con ~5 % de BER». Es falso: 50 dimensiones en
+`float32` son **1600 bits** contra 500 de fuente, un factor de 0.31× — una
+*expansión*. El análisis de presupuesto de bits lo dejó claro cuantizando el
+latente:
+
+| bits/dim | bits totales | factor vs 500 | BER test |
+|---|---|---|---|
+| 32 (float) | 1600 | 0.31× (expansión) | 0.054 |
+| 8 | 400 | 1.25× | 0.055 |
+| 4 | 200 | 2.50× | 0.061 |
+| 2 | 100 | 5.00× | 0.149 |
+| 1 | 50 | 10.00× | 0.181 |
+
+De aquí sale la decisión de usar latente binario en todo lo que vino después.
+
+**Primera aparición de una conclusión que resultó falsa dos veces.** En v1 el
+autoencoder lineal gana al profundo en **10 de 10** configuraciones. Se leyó
+como confirmación de Baldi y Hornik. Lo notable es que aquí el latente era
+*continuo*, sin estimador straight-through, así que **la causa no puede ser la
+inestabilidad de escala** que explicó el mismo fenómeno en v2. Son dos orígenes
+distintos para la misma conclusión equivocada, y ninguno sobrevivió al arnés
+corregido.
+
+En v1 la explicación probable es más simple: 4 000 muestras y un modelo profundo
+que no llega a ajustar una fuente casi lineal.
+
+**Interpretación corregida de la meseta.** Se dijo que el autoencoder «encuentra
+la dimensión intrínseca» porque su BER quedaba plano entre L=200 y L=50
+(0.0524, 0.0523, 0.0520). Pero el modelo lineal **no** hace meseta en ese rango:
+sigue bajando hasta 0.0186. Si la meseta fuera la dimensión intrínseca, ambos la
+tendrían. Era un piso de optimización del modelo profundo. Lo que sí es real es
+el colapso por debajo de L≈32, donde la información se pierde de verdad.
 
 ### v2 — ablación, barrido binario y primer intento de JSCC
 
@@ -323,7 +371,8 @@ volviéndolo a medir con margen.
 
 ### Qué se llevó de aquí al arnés definitivo
 
-- Latente binario con estimador straight-through (de la ablación de v2).
+- Latente binario con estimador straight-through (del presupuesto de bits de
+  v1, confirmado por la ablación de v2).
 - Baselines clásicos y cotas de Shannon como referencias obligatorias (de v3).
 - Oráculos como demostración de que la redundancia es explotable (de v3).
 - Reportar el exceso sobre el piso en JSCC, no el BER total (del fallo de v2).
