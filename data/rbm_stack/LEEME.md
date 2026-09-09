@@ -56,3 +56,23 @@ a L ≥ 125.
 - «El AE no gana nunca en R ≥ 0.25» era un artefacto de una sola arquitectura.
 - `markov` L=35 con el MLP ancho ganaba en v4 por 4σ; con el protocolo de
   `rbm_stack` pierde. Es sensible al protocolo.
+
+## `umbral.py` — ¿cruza el umbral el mejor punto?
+
+`markov` L=250, escalera + RBM, 4 semillas, dos tasas de ajuste fino:
+
+| ajuste fino | BER total | top 90 % | top 50 % |
+|---|---|---|---|
+| `lr = 1e-3` | 0.0107 ± 0.0001 | **0.0011** | 0.0001 |
+| `lr = 1e-4` | 0.0186 ± 0.0001 | 0.0029 | 0.0004 |
+
+Con BER total no cruza 10⁻² (0.0107). Con salida blanda cruza en 4/4 semillas
+por un orden de magnitud. El 10 % menos confiable tiene BER ≈ 0.097 y está
+marcado como dudoso por su LLR.
+
+**Titular final del proyecto:** *viable con FEC de decisión blanda, en una
+franja estrecha.* No «alcanza 10⁻²»: la simulación post-FEC con un LDPC real
+queda como extensión.
+
+Hipótesis refutada: `lr = 1e-4` empeora un 74 %. La degradación tras el pico
+temprano era específica de L=35; en L=250 el ajuste fino mejora hasta el final.

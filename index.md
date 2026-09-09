@@ -48,8 +48,10 @@ Referencia: [Teoría](docs/01-teoria.md) ·
 | Interacción arquitectura–tasa | Firme (4 semillas, protocolo idéntico) |
 
 **Proyecto cerrado.** La respuesta corta: los autoencoders **no** son viables
-para comprimir flujos de bits BPSK — 18 de 20 puntos de operación quedan por
-encima del umbral corregible por FEC. Pero **sí** superan a los métodos clásicos
+para comprimir flujos de bits BPSK a tasas agresivas — 18 de 20 puntos del
+barrido principal quedan por encima del umbral corregible por FEC — pero **sí
+son viables en una franja estrecha con decisión blanda**: `markov` L=250 con
+escalera y RBM llega a BER 0.0107 con el 90 % de los bits en 0.0011. Pero **sí** superan a los métodos clásicos
 a tasas agresivas (R ≤ 0.14) sobre estructura geométrica o correlacional, con
 márgenes de 4σ a 216σ. Sobre redundancia algebraica fracasan, y el diagnóstico
 mostró que el obstáculo no es la capacidad del modelo sino el objetivo de
@@ -58,7 +60,7 @@ reconstrucción.
 **Revisión posterior:** la frontera en R ≈ 0.25 era un artefacto de arquitectura.
 Una escalera estrecha con preentrenamiento RBM gana también a tasas altas, y en
 `markov` L=250 alcanza BER 0.0107 — el primer punto no trivial que roza el umbral
-operativo.
+operativo y cruza con salida blanda (top90 = 0.0011, 4/4 semillas).
 
 ---
 

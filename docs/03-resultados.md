@@ -14,10 +14,15 @@ como la inicialización del modelo.
 
 ## La respuesta
 
-**Los autoencoders no son viables para comprimir flujos de bits BPSK** a las
-tasas estudiadas. Con el umbral absoluto de telecomunicaciones —un BER previo a
-la decodificación de 10⁻², corregible con LDPC o turbo— **18 de 20 puntos de
-operación no lo alcanzan**.
+**Los autoencoders no son viables para comprimir flujos de bits BPSK a tasas
+agresivas, y son viables en una franja estrecha con decisión blanda.** Con el
+umbral absoluto de telecomunicaciones —un BER previo a la decodificación de
+10⁻², corregible con LDPC o turbo— **18 de 20 puntos de operación del barrido
+principal no lo alcanzan**. Pero el mejor punto no trivial, `markov` L=250 con
+escalera estrecha y preentrenamiento RBM, queda en BER 0.0107 con una
+estructura de confianza que un decodificador blando aprovecha: el 90 % de los
+bits más confiables llega a **0.0011** y el 10 % restante está marcado como
+dudoso. Ver «El punto que roza el umbral».
 
 | categoría | criterio | puntos |
 |---|---|---|
@@ -143,6 +148,39 @@ moderna ya resuelve lo que resolvía en 2006— fue **refutada**.
 **El dato que más importa:** `markov` L=250 con RBM da BER **0.0107**, a siete
 diezmilésimas del umbral corregible por FEC. Es el primer punto no trivial del
 proyecto que roza calidad operativa.
+
+---
+
+## El punto que roza el umbral
+
+`markov` L=250, escalera estrecha, preentrenamiento RBM, 4 semillas:
+
+| ajuste fino | BER total | BER top 90 % | BER top 50 % | cruza 10⁻² |
+|---|---|---|---|---|
+| `lr = 1e-3` | 0.0107 ± 0.0001 | **0.0011 ± 0.0000** | 0.0001 | con salida blanda, 4/4 |
+| `lr = 1e-4` | 0.0186 ± 0.0001 | 0.0029 | 0.0004 | con salida blanda, 4/4 |
+
+**Con BER total, no cruza** en ninguna semilla: 0.0107 contra 0.0100.
+
+**Con salida blanda, cruza en 4/4 y por un orden de magnitud.** Los errores están
+concentrados: despejando la mezcla, el 10 % de bits menos confiables tiene BER
+≈ 0.097 —casi moneda al aire— mientras el 90 % restante está en 10⁻³. Un
+decodificador de decisión blanda ve un canal donde nueve de cada diez bits
+llegan limpios y el décimo viene **marcado como dudoso** por su propio LLR. Es
+la estructura que LDPC y turbo aprovechan mejor.
+
+**Lo que esto demuestra y lo que no.** Demuestra que la estructura de confianza
+es favorable a FEC de decisión blanda. No es una simulación post-FEC: el BER
+final con un decodificador real requiere implementarlo. La afirmación defendible
+es *«viable con FEC de decisión blanda, en una franja estrecha»*, no *«alcanza
+10⁻²»*.
+
+**Una hipótesis más refutada.** Se esperaba que un ajuste fino con `lr = 1e-4`
+mejorara el 0.0107, porque a L=35 los preentrenados se degradaban tras un pico
+temprano. En L=250 no ocurre: el mejor checkpoint está en el paso ~27 000 de
+30 000 y el ajuste sigue mejorando hasta el final. Con `lr = 1e-4` el modelo
+queda subentrenado y el BER es un 74 % peor. La degradación temprana era
+específica de tasas agresivas.
 
 ---
 

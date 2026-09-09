@@ -40,9 +40,12 @@ bits posteriores y el decoder reconstruye desde el prefijo. Todos los escalones
 se optimizan en el mismo paso, lo que fuerza a que los primeros bits sean el
 mejor sub-código posible. Produce un códec compatible en tasa.
 
-**`stacked`** — preentrenamiento voraz por capas siguiendo a Hinton y
-Salakhutdinov (2006): 500 → 250 → 125 → 70 → 35, cada etapa comprimiendo el
-código binario de la anterior, con ajuste fino extremo a extremo posterior.
+**`stacked`** — cascada de compresores binarios: 500 → 250 → 125 → 70 → 35,
+cada etapa un autoencoder profundo comprimiendo el código **binario** de la
+anterior, con ajuste fino posterior. Se documentó originalmente como «la receta
+de Hinton y Salakhutdinov (2006)», pero no lo es: la reproducción fiel (RBM con
+divergencia contrastiva sobre activaciones continuas) está en `rbm_stack.py` y
+da resultados opuestos.
 
 ## Baselines clásicos
 

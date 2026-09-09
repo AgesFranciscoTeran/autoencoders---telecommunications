@@ -109,8 +109,9 @@ Ninguno de estos invalida lo hecho. Son extensiones.
 | 3 | Convolución en los cuatro escalones y con varias semillas | Probada en dos escalones con una semilla |
 | 4 | Selección de checkpoint por validación en todo el barrido | 1 de 4 semillas divergió; `gate_test3.py` ya lo implementa |
 | 5 | Mejor modelo de entropía del latente (MADE, transformer) | El modelo autoregresivo lineal da una cota probablemente floja; el GRU falló porque el latente no tiene orden natural |
-| 7 | Ajuste fino con tasa pequeña para preentrenados | Alcanzan su pico antes del paso 6 000 y luego se degradan |
+| 7 | ~~Ajuste fino con tasa pequeña para preentrenados~~ | Probado: en L=250 empeora un 74 %. Solo aplicaría a L=35 |
 | 8 | Búsqueda de arquitectura por tasa | Ancho a tasas agresivas, escalera a holgadas: falta barrer anchos intermedios |
+| 9 | Simulación post-FEC con LDPC real | Convierte la estructura de confianza favorable en una cifra de BER operativo |
 | 6 | VQ-VAE | La variante de VAE que aplica: latentes discretos y codebook como modelo de entropía. Un VAE gaussiano iría en contra: el término KL acota superiormente `I(x;z)` y reduciría la información justo cuando se quiere maximizarla |
 
 La extensión 1 es la más valiosa: convierte un resultado negativo en una
@@ -176,9 +177,14 @@ versiones y hash de cada script.
    de v4 no era la receta de Hinton. La reproducción fiel gana en 16/16 celdas.
 6. ¿Por qué la escalera estrecha supera al MLP ancho a tasas holgadas y pierde a
    tasas agresivas? ¿Capacidad frente a sobreajuste, o el sesgo de las sigmoides?
-7. ¿Con qué tasa de ajuste fino los preentrenados dejan de degradarse tras su
-   pico?
-8. ¿Cruza `markov` L=250 con RBM el umbral de 10⁻² con salida blanda?
+7. ~~¿Con qué tasa de ajuste fino los preentrenados dejan de degradarse?~~
+   **Cerrada: refutada.** En L=250 no se degradan; `lr = 1e-4` da un 74 % peor
+   por subentrenamiento. La degradación temprana era específica de L=35.
+8. ~~¿Cruza `markov` L=250 con RBM el umbral con salida blanda?~~ **Cerrada: sí,
+   4/4 semillas, top90 = 0.0011.** Con BER total no (0.0107).
+9. ¿Qué BER post-FEC da un decodificador LDPC real sobre los LLR del punto
+   `markov` L=250? Es lo que convertiría «favorable a decisión blanda» en una
+   cifra operativa.
 
 ---
 

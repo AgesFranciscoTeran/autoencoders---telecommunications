@@ -113,8 +113,8 @@ cinco fuentes; a 125 y por debajo, deja de serlo. La escalera no era arbitraria.
 **Dos interpretaciones distintas del "por pasos".** Conviene no confundirlas:
 
 - **Apilado** (`stacked`) — es una *técnica de entrenamiento*: entrenar
-  500→250, congelar, luego 250→125, etc. Es la receta de Hinton y Salakhutdinov
-  (2006).
+  500→250, congelar, luego 250→125, etc. *Se creyó que era la receta de Hinton
+  y Salakhutdinov (2006); no lo era — ver el registro de septiembre.*
 - **Anidado** (`nested`) — es una *arquitectura*: un solo modelo donde los
   primeros 35 bits ya son decodificables, los primeros 70 refinan, etc. Esto es
   refinamiento sucesivo (Equitz y Cover, 1991) y en telecomunicaciones equivale
@@ -207,8 +207,10 @@ fechado, más abajo.
   bloque 2× comprimible es indistinguible de su BER sobre ruido puro.
 
 **Firme tras el cierre:** el barrido de autoencoders, con calibración aprobada
-y cuatro semillas; la correspondencia arquitectura–estructura; y la
-inestabilidad de escala con su mecanismo medido.
+y cuatro semillas; la correspondencia arquitectura–estructura y
+arquitectura–tasa; la inestabilidad de escala con su mecanismo medido; el
+preentrenamiento fiel a Hinton; y el punto `markov` L=250 con estructura de
+confianza favorable a decisión blanda.
 
 **Abierto:** las extensiones de [Hacia un paper](07-hacia-paper.md), encabezadas
 por un objetivo auxiliar que supervise la estructura algebraica.
@@ -240,6 +242,8 @@ Si hubiera que resumir el proyecto en una frase por etapa:
     La frontera en R ≈ 0.25 lo era.
 15. Etiquetar un experimento con el nombre de un paper obliga a reproducirlo.
     Una cascada de compresores no es Hinton 2006.
+16. A siete diezmilésimas del umbral no se cierra: se mide. Y se dice qué
+    métrica cruzó y cuál no.
 
 ---
 
@@ -505,6 +509,19 @@ Dos experimentos, dos predicciones refutadas, una conclusión publicada revisada
 - **Victoria rebajada:** `markov` L=35 con el ancho (4σ en v4) pierde con este
   protocolo. Con preentrenamiento es robusta.
 - **`markov` L=250 con RBM: BER 0.0107.** A siete diezmilésimas del umbral FEC.
+
+### 2026-09-09 · La última pregunta: ¿cruza el umbral?
+
+- **`umbral.py`** sobre `markov` L=250, escalera + RBM, 4 semillas, dos tasas de
+  ajuste fino. Con BER total: **0.0107, no cruza** en ninguna semilla. Con salida
+  blanda: **top90 = 0.0011, cruza en 4/4** por un orden de magnitud. El 10 %
+  menos confiable tiene BER ≈ 0.097 y está marcado como dudoso.
+- **Titular final:** *viable con FEC de decisión blanda, en una franja
+  estrecha.* No *«alcanza 10⁻²»*: la simulación post-FEC queda como extensión.
+- **Predicción refutada (quinta mía):** `lr = 1e-4` no ayuda, empeora un 74 %.
+  La degradación temprana era de L=35; en L=250 el ajuste mejora hasta el final.
+- **Proyecto cerrado.** Las preguntas abiertas están en `07-hacia-paper.md`,
+  justificadas y priorizadas.
 
 Ver [Hacia un paper](07-hacia-paper.md) para lo que queda abierto.
 

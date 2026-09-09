@@ -31,9 +31,11 @@ solo puede juzgarse contra la cota de Shannon. Un BER suelto no significa nada.
 | Encoder convolucional | Firme |
 | Diagnóstico de paridad | Ejecutado (refutó la hipótesis inicial) |
 
-**Proyecto cerrado.** No son viables para flujos de bits BPSK (18/20 puntos por
-encima del umbral FEC), pero superan a lo clásico a tasas agresivas sobre
-estructura geométrica o correlacional.
+**Proyecto cerrado.** No son viables a tasas agresivas (18/20 puntos del barrido
+principal por encima del umbral FEC), pero sí en una franja estrecha con decisión
+blanda: `markov` L=250 con escalera y RBM llega a BER 0.0107 con el 90 % de los
+bits en 0.0011. Y superan a lo clásico en casi todo el mapa de `markov` y
+`lowdim` si la arquitectura se elige por tasa.
 
 ## Reproducir sin GPU, en segundos
 
