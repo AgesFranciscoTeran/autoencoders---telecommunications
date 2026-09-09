@@ -398,7 +398,7 @@ limitaciones si esto llega a paper.
 
 **Formato:** fecha · qué se ejecutó · qué salió · qué se decidió.
 
-### 2026-08-23
+### Primeros intentos
 
 - **Ejecutado:** `verificar_robustez.py --seeds 10` sobre los baselines clásicos.
 - **Resultado:** la diferencia PCA entre `code` y `random` queda dentro de
@@ -406,7 +406,7 @@ limitaciones si esto llega a paper.
 - **Decidido:** el hallazgo pasa de observación a resultado con barras de error.
   Se adopta procedencia automática en `data/procedencia.json`.
 
-### 2026-08-25 · Calibración del arnés
+### Calibración del arnés
 
 - **Ejecutado:** cuatro rondas de diagnóstico sobre `oversamp` L=250, donde la
   respuesta correcta es BER ≈ 0 porque al autoencoder le sobra el doble de bits.
@@ -426,7 +426,7 @@ limitaciones si esto llega a paper.
 - **Decidido:** relanzar el barrido con esa configuración. Añadido control de
   monotonía al verificador (más bits siempre debe dar menos BER).
 
-### 2026-08-25 · Barrido con cinco semillas
+### Barrido con cinco semillas
 
 - **Calibración in situ aprobada:** `oversamp direct` L=125 da 3.2 × 10⁻⁷.
 - **Reproducibilidad mucho mayor de lo previsto:** mediana de |Δ| entre semillas
@@ -439,7 +439,7 @@ limitaciones si esto llega a paper.
   L=250 (0.185 en vez de ~2 × 10⁻⁶). El mejor checkpoint por validación pasa a
   ser obligatorio.
 
-### 2026-08-25 · Entropía del latente
+### Entropía del latente
 
 - **Primer estimador refutado por cota de cordura.** La corrección de segundo
   orden `H ≈ H_marg − Σ I(i;j)` dio 0.0 bits para un latente que reconstruye una
@@ -454,7 +454,7 @@ limitaciones si esto llega a paper.
 - **Consecuencia:** a tasas bajas, donde el autoencoder gana, el latente es casi
   incompresible. La codificación entrópica no regrafica el mapa de viabilidad.
 
-### 2026-08-25 · Cierre: tres experimentos finales
+### Cierre: tres experimentos finales
 
 Los tres refutaron afirmaciones previas. Es lo que se esperaba de ellos.
 
@@ -482,7 +482,7 @@ Los tres refutaron afirmaciones previas. Es lo que se esperaba de ellos.
   desde 400k. El 14.5 % que atribuí a "más datos" venía de **más pasos**: con
   épocas fijas, duplicar los datos duplicaba las actualizaciones.
 
-### 2026-09-09 · Preentrenamiento fiel y el confundido de arquitectura
+### Preentrenamiento fiel y el confundido de arquitectura
 
 Dos experimentos, dos predicciones refutadas, una conclusión publicada revisada.
 
@@ -510,7 +510,7 @@ Dos experimentos, dos predicciones refutadas, una conclusión publicada revisada
   protocolo. Con preentrenamiento es robusta.
 - **`markov` L=250 con RBM: BER 0.0107.** A siete diezmilésimas del umbral FEC.
 
-### 2026-09-09 · La última pregunta: ¿cruza el umbral?
+### La última pregunta: ¿cruza el umbral?
 
 - **`umbral.py`** sobre `markov` L=250, escalera + RBM, 4 semillas, dos tasas de
   ajuste fino. Con BER total: **0.0107, no cruza** en ninguna semilla. Con salida
