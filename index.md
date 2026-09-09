@@ -44,6 +44,8 @@ Referencia: [Teoría](docs/01-teoria.md) ·
 | Escalera anidada | Firme (costo mediano +0.0011 BER) |
 | Encoder convolucional | Firme (2 escalones, 1 semilla) |
 | Diagnóstico de paridad | Ejecutado — **refutó** la hipótesis inicial |
+| Preentrenamiento por capas (fiel) | Firme — **ayuda**, contra la predicción |
+| Interacción arquitectura–tasa | Firme (4 semillas, protocolo idéntico) |
 
 **Proyecto cerrado.** La respuesta corta: los autoencoders **no** son viables
 para comprimir flujos de bits BPSK — 18 de 20 puntos de operación quedan por
@@ -52,6 +54,11 @@ a tasas agresivas (R ≤ 0.14) sobre estructura geométrica o correlacional, con
 márgenes de 4σ a 216σ. Sobre redundancia algebraica fracasan, y el diagnóstico
 mostró que el obstáculo no es la capacidad del modelo sino el objetivo de
 reconstrucción.
+
+**Revisión posterior:** la frontera en R ≈ 0.25 era un artefacto de arquitectura.
+Una escalera estrecha con preentrenamiento RBM gana también a tasas altas, y en
+`markov` L=250 alcanza BER 0.0107 — el primer punto no trivial que roza el umbral
+operativo.
 
 ---
 

@@ -31,6 +31,10 @@ tres líneas consigue lo mismo. El mejor resultado sobre estructura no trivial e
 `markov` a 250 bits: BER 0.0344, es decir **17 bits errados de cada 500**,
 equivalente a un enlace BPSK sin codificar a 2.2 dB.
 
+Con escalera estrecha y preentrenamiento RBM (ver más abajo), ese mismo punto
+baja a **0.0107** — a siete diezmilésimas del umbral. Sugiere que la
+inviabilidad es de las tasas agresivas, no de todo el mapa.
+
 ---
 
 ## Pero hay una franja donde sí superan a lo clásico
@@ -46,10 +50,12 @@ Seis configuraciones ganan al mejor método clásico en **4 de 4 semillas**:
 | markov | nested | 35 | 0.1485 ± 0.0006 | 0.1531 | +0.0046 | 8 σ |
 | markov | direct | 70 | 0.0902 ± 0.0003 | 0.0914 | +0.0012 | 4 σ |
 
-Dos condiciones, ambas necesarias: **tasas agresivas** (R ≤ 0.14) y **estructura
-geométrica o correlacional**. En R ≥ 0.25 el autoencoder no gana en ninguna
-fuente. La frontera está en R ≈ 0.25, donde `lowdim` gana 3/4 semillas por
-+0.0005 y `markov` pierde 0/4.
+Estas seis victorias son del MLP ancho de v4 (1536×4). Con esa arquitectura la
+ventaja aparece solo a **tasas agresivas** (R ≤ 0.14) sobre **estructura
+geométrica o correlacional**, y desaparece en R ≥ 0.25.
+
+**Esa frontera resultó ser un artefacto de arquitectura.** Ver más abajo: con
+una escalera estrecha, el autoencoder gana también a tasas altas.
 
 La tensión que define el proyecto: **el autoencoder gana justo en el régimen
 donde ningún método alcanza calidad de enlace.** Superar a PCA por un 43 % no
@@ -61,6 +67,82 @@ importa si ambos están dos órdenes de magnitud por encima del mínimo operativ
 la tabla (0.2453 a 0.2611, sd 0.0066). Es ruido oscilando alrededor de la vara,
 que es exactamente lo que debe ocurrir sobre datos incompresibles. Una victoria
 consistente ahí habría invalidado el experimento.
+
+---
+
+## La frontera se mueve con la arquitectura
+
+Una **escalera estrecha** (500 → 250 → 125 → 70 → 35, sigmoides intermedias,
+mismo cuello binario) comparada contra el MLP ancho con **protocolo idéntico**
+—mismos pasos, misma tasa de aprendizaje, misma selección de checkpoint por
+validación— sobre 4 semillas:
+
+| caso | vara | MLP ancho | escalera | quién gana a la vara |
+|---|---|---|---|---|
+| markov L=35 | 0.1531 | **0.1564** | 0.1979 | ninguno, con este protocolo |
+| markov L=125 | 0.0488 | 0.0614 | **0.0464** | escalera |
+| markov L=250 | 0.0250 | 0.0288 | **0.0135** | escalera, por 46 % |
+| lowdim L=250 | 0.0492 | 0.0553 | **0.0386** | escalera |
+
+**Interacción arquitectura–tasa.** A tasa agresiva (L=35) el MLP ancho gana por
+0.04; a tasas holgadas (L ≥ 125) la escalera gana por ~0.015. El signo se
+invierte. Hipótesis: cuando el cuello es apretado la capacidad ayuda; cuando
+sobra, el MLP ancho encuentra soluciones peores y la escalera —que ya comprime
+en su primera capa— no tiene con qué sobreajustar.
+
+**La escalera es estable; el MLP ancho no.** Diferencia entre BER final y BER al
+mejor checkpoint: +0.0000 en las 16 corridas de la escalera; hasta +0.009 en el
+MLP ancho, que en `markov` L=35 alcanza su pico en el paso 750 de 30 000 y luego
+se degrada. Los resultados de v4 a tasas altas medían el MLP ancho degradado,
+pero corregir eso explica solo un tercio de la brecha; el resto es arquitectura.
+
+**Consecuencia sobre el mapa.** Con la arquitectura elegida por tasa, el
+autoencoder supera a la vara clásica en `markov` a **todas** las tasas y en
+`lowdim` a tres de cuatro. Elegir arquitectura por punto es un ajuste y debe
+reportarse como tal; cada punto está validado sobre 4 semillas.
+
+**Una victoria previa se rebaja.** `markov` L=35 con el MLP ancho ganaba en v4
+por 4σ; con este protocolo pierde (0.1564 contra 0.1531). Es sensible al
+protocolo de entrenamiento. Con preentrenamiento sí es robusta.
+
+---
+
+## El preentrenamiento por capas sí ayuda
+
+El modo `stacked` de v4 era una **cascada de compresores binarios** —cada etapa
+un autoencoder profundo comprimiendo el código binario de la anterior— y fue el
+peor modo. Se etiquetó erróneamente como «la receta de Hinton y Salakhutdinov».
+
+La reproducción fiel —**RBM con divergencia contrastiva**, decoder `Wᵀ`, o
+autoencoder superficial por capa sobre activaciones continuas— sobre la
+escalera estrecha, 4 semillas:
+
+| caso | aleatoria | pre. AE | pre. RBM | mejora |
+|---|---|---|---|---|
+| lowdim L=35 | 0.2610 | **0.1833** | 0.1911 | 29.8 % |
+| lowdim L=70 | 0.1376 | **0.1140** | 0.1146 | 17.2 % |
+| lowdim L=250 | 0.0386 | 0.0394 | **0.0369** | 4.4 % |
+| markov L=35 | 0.1979 | **0.1418** | 0.1732 | 28.3 % |
+| markov L=70 | 0.1010 | **0.0838** | 0.0891 | 17.0 % |
+| markov L=250 | 0.0135 | 0.0143 | **0.0107** | 20.7 % |
+
+Preentrenar gana en **16 de 16** celdas de `lowdim` y `markov`, 4/4 semillas. La
+predicción registrada antes de correrlo —que no ayudaría porque la optimización
+moderna ya resuelve lo que resolvía en 2006— fue **refutada**.
+
+- **RBM y AE no son equivalentes.** El AE gana a tasas bajas (`markov` L=35:
+  0.1418 contra 0.1732); la RBM a tasas altas (`markov` L=250: 0.0107 contra
+  0.0143). El objetivo de la etapa importa, en dirección opuesta según la tasa.
+- **El ajuste fino daña la inicialización.** Los preentrenados alcanzan su mejor
+  checkpoint entre los pasos 750 y 6 000 de 30 000 y luego se degradan. Hinton
+  usaba tasas muy pequeñas para ajustar; con `lr = 1e-3` el ajuste destruye
+  parte de lo ganado. Sin selección de checkpoint habría parecido inútil.
+- **Sobre `code`, nada cambia.** Los tres brazos quedan al nivel de ruido. Ni
+  una RBM —generativa, binaria— ve la paridad de grado 3.
+
+**El dato que más importa:** `markov` L=250 con RBM da BER **0.0107**, a siete
+diezmilésimas del umbral corregible por FEC. Es el primer punto no trivial del
+proyecto que roza calidad operativa.
 
 ---
 
@@ -187,9 +269,10 @@ geométrica más eficientemente que correlacional.
 
 Anidar sale **esencialmente gratis** (costo mediano +0.0011 BER) y produce un
 códec compatible en tasa: un modelo con cuatro puntos de operación. El
-preentrenamiento voraz por capas (`stacked`) es **consistentemente el peor y el
-menos reproducible** (|Δ| máxima entre semillas de 0.079 frente a 0.010 en los
-otros modos).
+modo `stacked` de v4 —una cascada de compresores binarios profundos— es
+**consistentemente el peor y el menos reproducible** (|Δ| máxima entre semillas
+de 0.079). Ese modo **no era** la receta de Hinton y Salakhutdinov; la
+reproducción fiel sí ayuda (ver «El preentrenamiento por capas sí ayuda»).
 
 ### Los datos están saturados
 

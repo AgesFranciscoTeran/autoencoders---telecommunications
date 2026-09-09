@@ -236,6 +236,10 @@ Si hubiera que resumir el proyecto en una frase por etapa:
     la reconstrucción no lleve hasta ella.
 13. Un resultado negativo con presupuesto corto es indistinguible de uno real:
     hay que volver a medirlo con margen antes de creerlo.
+14. Una conclusión sobre «los autoencoders» puede ser sobre una arquitectura.
+    La frontera en R ≈ 0.25 lo era.
+15. Etiquetar un experimento con el nombre de un paper obliga a reproducirlo.
+    Una cascada de compresores no es Hinton 2006.
 
 ---
 
@@ -473,6 +477,34 @@ Los tres refutaron afirmaciones previas. Es lo que se esperaba de ellos.
   fijos (30 000 en todas las corridas), el BER va de 0.1106 a 0.1040 y se aplana
   desde 400k. El 14.5 % que atribuí a "más datos" venía de **más pasos**: con
   épocas fijas, duplicar los datos duplicaba las actualizaciones.
+
+### 2026-09-09 · Preentrenamiento fiel y el confundido de arquitectura
+
+Dos experimentos, dos predicciones refutadas, una conclusión publicada revisada.
+
+- **`rbm_stack.py`** (RBM con CD-1 y AE por capa; escalera estrecha; 4 semillas;
+  mejor checkpoint). Predicción registrada: no ayudaría. **Refutada:** gana en
+  16/16 celdas de `lowdim` y `markov`, hasta 30 % a L=35. El `stacked` de v4,
+  etiquetado como «la receta de Hinton», era una cascada de compresores
+  binarios. Corregidas bibliografía y resultados.
+- **RBM y AE no son equivalentes:** el AE gana a tasas bajas, la RBM a altas.
+  Los preentrenados alcanzan su pico entre los pasos 750 y 6 000 y luego se
+  degradan: el ajuste a `lr = 1e-3` daña la inicialización.
+- **Hallazgo lateral:** la escalera **con inicialización aleatoria** ya daba
+  0.0135 en `markov` L=250, contra 0.0345 de v4. Confundido: checkpoint o
+  arquitectura.
+- **`confundido.py`** (2×2, protocolo idéntico importado de `rbm_stack`).
+  **Veredicto: arquitectura, 63–100 % de la brecha.** Checkpoint ~0.006;
+  arquitectura 0.015.
+- **Interacción arquitectura–tasa:** el ancho gana en L=35 por 0.04; la escalera
+  en L ≥ 125 por ~0.015. La escalera es perfectamente estable (final − mejor =
+  0.0000 en 16/16); el ancho se degrada hasta 0.009.
+- **Conclusión publicada revisada:** «el AE no gana en R ≥ 0.25» era artefacto
+  de una sola arquitectura. Con la escalera gana en `markov` L=125, L=250 y
+  `lowdim` L=250.
+- **Victoria rebajada:** `markov` L=35 con el ancho (4σ en v4) pierde con este
+  protocolo. Con preentrenamiento es robusta.
+- **`markov` L=250 con RBM: BER 0.0107.** A siete diezmilésimas del umbral FEC.
 
 Ver [Hacia un paper](07-hacia-paper.md) para lo que queda abierto.
 

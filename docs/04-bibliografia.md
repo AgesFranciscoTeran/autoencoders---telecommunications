@@ -41,10 +41,16 @@ teoría no garantizara ya para un modelo lineal. Fundamenta toda la sección de
 of data with neural networks.* Science, 313(5786), 504–507.
 
 Muestra que un autoencoder profundo supera a PCA **en datos con estructura**, y
-propone el preentrenamiento voraz por capas. Dos usos directos: (a) es la
-hipótesis que el proyecto pone a prueba fuente por fuente, y (b) el modo de
-entrenamiento `stacked` implementa su receta (500 → 250 → 125 → 70 → 35, con
-ajuste fino posterior extremo a extremo).
+propone el preentrenamiento voraz por capas con RBM. Dos usos directos: (a) es
+la hipótesis que el proyecto pone a prueba fuente por fuente, y (b) su receta
+se reproduce fielmente en `rbm_stack.py` (RBM con divergencia contrastiva,
+decoder `Wᵀ`, ajuste fino posterior).
+
+**Corrección de una etiqueta anterior.** El modo `stacked` de v4 se documentó
+como «la receta de Hinton». No lo era: era una cascada de autoencoders profundos
+comprimiendo códigos binarios, y su fracaso no decía nada sobre el paper. La
+reproducción fiel **sí ayuda**, en 16 de 16 celdas, contra la predicción de que
+la optimización moderna la había vuelto innecesaria.
 
 **Vincent, P., Larochelle, H., Bengio, Y., & Manzagol, P.-A. (2008).**
 *Extracting and composing robust features with denoising autoencoders.*

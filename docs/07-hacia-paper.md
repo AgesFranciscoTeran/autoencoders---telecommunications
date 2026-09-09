@@ -61,6 +61,16 @@ direcciones, que es lo que la hace sólida.
 *Sustento:* completo, aunque con dos escalones (L=70 y L=125) y una sola semilla
 por configuración.
 
+### 3b. Interacción arquitectura–tasa y preentrenamiento
+
+La escalera estrecha supera al MLP ancho a tasas holgadas (L ≥ 125) y pierde a
+tasas agresivas (L=35), con protocolo idéntico y 4 semillas. Y el
+preentrenamiento fiel a Hinton gana en 16/16 celdas, refutando la predicción
+registrada.
+
+*Sustento:* completo, 4 semillas. Falta el control de cómputo igualado para el
+preentrenamiento.
+
 ### 4. Inestabilidad de escala en latentes binarios
 
 Modo de fallo con mecanismo identificado y confirmado por medición (`pre_max`
@@ -99,6 +109,8 @@ Ninguno de estos invalida lo hecho. Son extensiones.
 | 3 | Convolución en los cuatro escalones y con varias semillas | Probada en dos escalones con una semilla |
 | 4 | Selección de checkpoint por validación en todo el barrido | 1 de 4 semillas divergió; `gate_test3.py` ya lo implementa |
 | 5 | Mejor modelo de entropía del latente (MADE, transformer) | El modelo autoregresivo lineal da una cota probablemente floja; el GRU falló porque el latente no tiene orden natural |
+| 7 | Ajuste fino con tasa pequeña para preentrenados | Alcanzan su pico antes del paso 6 000 y luego se degradan |
+| 8 | Búsqueda de arquitectura por tasa | Ancho a tasas agresivas, escalera a holgadas: falta barrer anchos intermedios |
 | 6 | VQ-VAE | La variante de VAE que aplica: latentes discretos y codebook como modelo de entropía. Un VAE gaussiano iría en contra: el término KL acota superiormente `I(x;z)` y reduciría la información justo cuando se quiere maximizarla |
 
 La extensión 1 es la más valiosa: convierte un resultado negativo en una
@@ -159,8 +171,14 @@ versiones y hash de cada script.
    el lineal?
 4. ¿Existe alguna combinación de tasa y estructura donde el autoencoder cruce el
    umbral de 10⁻² sobre una fuente no trivial?
-5. ¿Por qué el preentrenamiento voraz por capas perjudica sistemáticamente en
-   este problema, cuando en Hinton y Salakhutdinov (2006) ayudaba?
+5. ~~¿Por qué el preentrenamiento voraz por capas perjudica en este problema?~~
+   **Cerrada, con respuesta contraria a la esperada.** No perjudica: el `stacked`
+   de v4 no era la receta de Hinton. La reproducción fiel gana en 16/16 celdas.
+6. ¿Por qué la escalera estrecha supera al MLP ancho a tasas holgadas y pierde a
+   tasas agresivas? ¿Capacidad frente a sobreajuste, o el sesgo de las sigmoides?
+7. ¿Con qué tasa de ajuste fino los preentrenados dejan de degradarse tras su
+   pico?
+8. ¿Cruza `markov` L=250 con RBM el umbral de 10⁻² con salida blanda?
 
 ---
 
