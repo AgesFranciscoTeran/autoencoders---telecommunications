@@ -110,6 +110,18 @@
   ul.plain li { margin: 0 0 0.5em 0; padding-left: 1.2em; text-indent: -1.2em; }
   ul.plain li::before { content: "—"; color: var(--mist); display: inline-block; width: 1.2em; text-indent: 0; }
 
+  /* tira de tres columnas de la portada */
+  .tira { display: grid; grid-template-columns: 1.15fr 1fr 1fr; gap: 2.2em; margin: 1.4em 0 0 0; font-family: var(--sans); }
+  .tira h3 { font-family: var(--sans); font-size: 0.78em; font-weight: 600; color: var(--graphite);
+             margin: 0 0 0.55em 0; padding-top: 0.4em; border-top: 1.5px solid var(--ink); letter-spacing: 0; }
+  .tira ul { list-style: none; padding: 0; margin: 0; font-size: 0.72em; line-height: 1.45; color: var(--ink); }
+  .tira li { margin: 0 0 0.5em 0; }
+  .tira li span { color: var(--mist); }
+  .tira code { font-size: 0.95em; }
+  .creditos { font-family: var(--sans); font-size: 0.72em; color: var(--mist); margin-top: 1.5em; }
+  .creditos strong { color: var(--graphite); font-weight: 600; }
+  .creditos a { color: var(--zona); text-decoration: none; border-bottom: 1px solid var(--zona); }
+
   .titulo-fuente { font-family: var(--sans); color: var(--graphite); font-size: 0.85em; margin-top: 2.2em; }
   .titulo-fuente a { color: var(--zona); text-decoration: none; border-bottom: 1px solid var(--zona); }
 
@@ -127,10 +139,40 @@
 <!-- 1 -->
 <section>
   <h1>¿Son viables los autoencoders para comprimir señales BPSK?</h1>
-  <p class="lede">Vectores de 500 símbolos ±1, un cuello de botella binario, y la pregunta de si un autoencoder le gana a lo que ya existe.</p>
-  <p class="titulo-fuente">Cuaderno completo, código y datos regenerables en <a href="../index.html">el sitio del proyecto</a>.</p>
+  <p class="lede">Vectores de 500 símbolos ±1 y un cuello de botella binario, contra los métodos clásicos que hacen ese trabajo hoy con el mismo presupuesto de bits.</p>
+  <div class="tira">
+    <div>
+      <h3>Contra qué se compara</h3>
+      <ul>
+        <li>PCA con cuantización uniforme, probando todas las combinaciones de componentes y bits</li>
+        <li>Decimación, reconstruida por retención y por vecino más cercano</li>
+        <li>Oráculos que conocen la estructura de la señal, como cota superior</li>
+        <li><span>Todos con el mismo número de bits que el autoencoder.</span></li>
+      </ul>
+    </div>
+    <div>
+      <h3>Con qué se decide</h3>
+      <ul>
+        <li>BER, y BER sobre los bits de mayor confianza</li>
+        <li>El piso: cota de Shannon con distorsión de Hamming</li>
+        <li>El umbral: 10⁻² previo a la decodificación, que un FEC lleva a cero</li>
+        <li><span>Viable = por debajo de la vara y del umbral, a una tasa contable en bits.</span></li>
+      </ul>
+    </div>
+    <div>
+      <h3>Qué se corrió</h3>
+      <ul>
+        <li>5 fuentes × 3 modos × 4 tasas = 60 configuraciones</li>
+        <li>4 semillas por punto, con calibración obligatoria del arnés</li>
+        <li>3 experimentos de cierre sobre la escalera estrecha</li>
+        <li><span>Todo en el H200, regenerable desde el repositorio.</span></li>
+      </ul>
+    </div>
+  </div>
+  <p class="creditos"><strong>Francisco Terán</strong> · Matemáticas Aplicadas y Ciencias de la Computación, USFQ · Prof. Henry Carvajal · septiembre de 2026 &nbsp;·&nbsp; <a href="../index.html">cuaderno, código y datos</a></p>
   <aside class="notes">
     Sesión de hora y media, a solas. Presupuesto: unos 55 minutos de material y el resto para conversación. Si me interrumpe, dejo que la pregunta se agote antes de volver.
+    La tira responde de entrada las tres preguntas que si no se hacen a los diez minutos: contra qué, con qué criterio, y con cuánto respaldo.
   </aside>
 </section>
 
