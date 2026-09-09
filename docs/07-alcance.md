@@ -1,6 +1,6 @@
 ---
 layout: default
-title: Hacia un paper — qué queda
+title: Alcance
 ---
 
 # Hacia un paper: qué queda
@@ -191,7 +191,7 @@ versiones y hash de cada script.
 
 ---
 
-## Antes de publicar
+## Asegurarse antes de revision
 
 - Verificar todos los datos bibliográficos contra las fuentes originales.
 - Decidir la atribución institucional y consultarla con quien corresponda.

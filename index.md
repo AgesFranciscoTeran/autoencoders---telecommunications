@@ -31,7 +31,7 @@ Referencia: [Teoría](docs/01-teoria.md) ·
 [Metodología](docs/02-metodologia.md) ·
 [Bibliografía](docs/04-bibliografia.md) ·
 [Reproducir](docs/05-reproducir.md) ·
-[Hacia un paper](docs/07-hacia-paper.md)
+[Alcance](docs/07-alcance.md)
 
 ---
 
