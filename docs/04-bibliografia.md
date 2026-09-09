@@ -151,6 +151,11 @@ usa para calcular exactamente la entropía de la fuente `lowdim`, que resulta se
 164.9 bits y no los 32 que sugiere ingenuamente la dimensión del manifold. Sin
 este resultado la cota de esa fuente estaría mal puesta.
 
+**Alcance de esta entrada.** Cover (1965) justifica el **conteo**, no el
+**diseño** de la fuente. La procedencia del generador `sign(Wz)` está en la
+sección siguiente; separarlas importa porque son dos objeciones distintas y se
+responden por separado.
+
 **⚠ Equitz, W. H. R., & Cover, T. M. (1991).** *Successive refinement of
 information.* IEEE Transactions on Information Theory, 37(2), 269–275.
 
@@ -159,6 +164,87 @@ penalización. Es el marco teórico de la **escalera anidada** del proyecto
 (35 → 70 → 125 → 250 bits): predice que puede existir una brecha entre el
 rendimiento anidado y el dedicado, y por eso el arnés compara explícitamente los
 modos `nested` y `direct` en lugar de asumir que anidar es gratis.
+
+---
+
+## Medición de un bit y proyecciones por signo
+
+Esta sección da procedencia al diseño de la fuente `lowdim`. Es la respuesta a
+la objeción previsible —«¿por qué tomar un punto y hacerle 500 preguntas
+binarias, y no otra construcción geométrica?»— y conviene tenerla explícita:
+`sign(Wz)` no es una fuente inventada para el experimento, es un modelo de
+medición establecido al que llegan de forma independiente tres líneas de
+trabajo.
+
+**Goemans, M. X., & Williamson, D. P. (1995).** *Improved approximation
+algorithms for maximum cut and satisfiability problems using semidefinite
+programming.* Journal of the ACM, 42(6), 1115–1145.
+
+Origen del redondeo por hiperplano aleatorio: tomar un hiperplano al azar y
+asignar según el lado en que cae cada vector. Se cita como raíz genealógica de
+las dos entradas siguientes, que llegan al mismo objeto desde la búsqueda por
+similitud y desde la adquisición de señales.
+
+**⚠ Charikar, M. (2002).** *Similarity estimation techniques from rounding
+algorithms.* Proceedings of the 34th Annual ACM Symposium on Theory of Computing
+(STOC), 380–388.
+
+Introduce la función hash sensible a la localidad basada en hiperplanos
+aleatorios, y establece que la probabilidad de que dos vectores caigan en lados
+opuestos es θ/π, con θ el ángulo entre ellos. **Es lo que justifica el BER como
+métrica sobre `lowdim`**: la distancia de Hamming en la salida resulta ser una
+función monótona del ángulo en el latente, de modo que el BER sobre esta fuente
+mide error angular en ℝ³² salvo un cambio de escala. Sin esta identidad, el BER
+sería solo la métrica del campo; con ella, es además la métrica natural de la
+fuente.
+
+**⚠ Boufounos, P. T., & Baraniuk, R. G. (2008).** *1-bit compressive sensing.*
+42nd Annual Conference on Information Sciences and Systems (CISS), 16–21.
+
+Establece el modelo de medición y = sign(Ax), donde cada medición conserva
+únicamente el signo de una proyección lineal. **Es literalmente el generador de
+`lowdim`.** Su función en el proyecto es quitarle a esa fuente el carácter de
+artificio: la construcción «un punto latente, muchas preguntas binarias sobre
+él» es el modelo de adquisición estándar de un cuantizador de un bit, no una
+elección de conveniencia.
+
+**Jacques, L., Laska, J. N., Boufounos, P. T., & Baraniuk, R. G. (2013).**
+*Robust 1-bit compressive sensing via binary stable embeddings of sparse
+vectors.* IEEE Transactions on Information Theory, 59(4), 2082–2102.
+
+El lado de la recuperación: cuántas mediciones de un bit hacen falta para
+reconstruir el vector latente y con qué robustez. Es el marco del **oráculo de
+`lowdim`** —el método que conoce `W` y transmite `z` cuantizado— y sirve de
+verificación externa de que ese oráculo está bien planteado como cota superior
+de lo alcanzable.
+
+**⚠ Li, Y., Tao, C., Seco-Granados, G., Mezghani, A., Swindlehurst, A. L., &
+Liu, L. (2017).** *Channel estimation and performance analysis of one-bit
+massive MIMO systems.* IEEE Transactions on Signal Processing, 65(15),
+4075–4089.
+
+Estimación de canal y desempeño del enlace ascendente en massive MIMO con ADCs
+de un bit en la estación base, vía descomposición de Bussgang. Es la
+**relevancia aplicada** de la fuente: los convertidores de un bit son un régimen
+real, motivado por el consumo de potencia de los ADCs, y `lowdim` es su modelo
+de observación.
+
+**Límite que conviene declarar.** En `lowdim` la matriz `W` es gaussiana i.i.d.
+—hiperplanos en posición general, que es la hipótesis exacta bajo la cual el
+conteo de Cover es una igualdad y no una cota. Una matriz de canal real no es
+i.i.d.: es correlacionada y dispersa en el dominio angular, como señala Wen et
+al. (2018). La fuente modela la **geometría de la medición de un bit**, no la
+estadística de un canal real, y no necesita hacerlo: su trabajo es aislar un
+tipo de redundancia con entropía exacta. Sustituirla por un canal realista es la
+extensión de señales reales listada en *Hacia un paper*.
+
+**Mo, J., & Heath, R. W. (2015).** *Capacity analysis of one-bit quantized MIMO
+systems with transmitter channel state information.* IEEE Transactions on Signal
+Processing, 63(20), 5498–5512.
+
+Análisis de capacidad del mismo régimen. Complementa a Li et al. por el lado
+teórico: cuánta información sobrevive a la cuantización de un bit, que es la
+pregunta de la que `lowdim` es un caso particular con `W` conocida.
 
 ---
 
@@ -214,8 +300,15 @@ La lógica del proyecto encadena estas referencias así:
 3. Hinton–Salakhutdinov afirma que las redes profundas **superan** esa vara
    cuando hay estructura — la hipótesis a poner a prueba.
 4. Bengio et al. hacen que la comparación sea **honesta** (bits reales).
-5. Shalev-Shwartz et al. predicen **dónde debería fallar** (redundancia
+5. Cover (1965) hace que la cota de `lowdim` esté **bien puesta** (164.9 bits,
+   no 32).
+6. Boufounos–Baraniuk y Charikar dan **procedencia al diseño de `lowdim`**: el
+   generador es un modelo de medición establecido, y el BER es la métrica
+   natural sobre él, no solo la del campo.
+7. Shalev-Shwartz et al. predicen **dónde debería fallar** (redundancia
    algebraica).
-6. Wen et al. muestran **dónde sí funciona** en la práctica (CSI, no bits).
-7. Equitz–Cover enmarcan la **contribución de ingeniería** (códec escalable).
-8. O'Shea–Hoydis delimitan **qué no es este proyecto** (codificación de canal).
+8. Wen et al. muestran **dónde sí funciona** en la práctica (CSI, no bits).
+9. Li et al. y Mo–Heath sitúan la fuente `lowdim` en un **régimen real** (ADCs
+   de un bit en massive MIMO).
+10. Equitz–Cover enmarcan la **contribución de ingeniería** (códec escalable).
+11. O'Shea–Hoydis delimitan **qué no es este proyecto** (codificación de canal).
