@@ -89,14 +89,28 @@ bits. Redundancia **correlacional**.
 **`lowdim`** — $$\mathrm{sign}(Wz)$$ con $$z \in \mathbb{R}^{32}$$. $$H = 164.9$$ bits
 (no 32 — ver *conteo de Cover*). Redundancia **geométrica**.
 
+Es el modelo de medición de un bit `y = sign(Ax)` (Boufounos y Baraniuk, 2008),
+no una construcción ad hoc.
+
 **`code`** — Código lineal sistemático de tasa 1/2 sobre GF(2) con checks de
 grado 3. $$H = 250$$ bits. Redundancia **algebraica**. El caso crítico.
 
 **GF(2)** — El cuerpo de dos elementos. Aritmética módulo 2, donde la suma es el
 XOR.
 
-**Check de grado 3** — Cada bit de paridad es el XOR de 3 bits de información.
-La clave del proyecto: esa dependencia es invisible para métodos lineales.
+**Check de grado 3** — Cada bit de paridad es el XOR de 3 bits sistemáticos
+(peso de columna 3 en `P`; peso de fila 4 en `H = [Pᵀ | I]`). La dependencia es
+invisible no solo para métodos lineales sino también para los de **segundo
+orden**: cualquier grado ≥ 2 anula las correlaciones por pares y deja la
+covarianza en la identidad, así que PCA es ciego desde el grado 2. Lo que
+distingue al 3 es que además queda fuera del alcance de una vara cuadrática, sin
+salirse de lo que el gradiente aprende con supervisión. Ver
+[Metodología](02-metodologia.md).
+
+**Peso de columna / peso de fila** — Peso de columna 3 en `P`: cada paridad
+depende de 3 sistemáticos. Peso de fila 4 en `H`: cada nodo de chequeo toca 3
+sistemáticos más su paridad. Es la misma cosa dicha desde los dos lados; la
+segunda es la convención en codificación.
 
 **Conteo de Cover** — $$C(n,k) = 2\sum_{i<k}\binom{n-1}{i}$$, el número de
 dicotomías linealmente separables. Da la entropía real de `lowdim`: 164.9 bits,

@@ -27,8 +27,115 @@ memorizar.
   Redundancia correlacional.
 - **`lowdim`** — $$\mathrm{sign}(Wz)$$ con $$z \in \mathbb{R}^{32}$$. Redundancia
   geométrica: la fuente vive en un manifold de baja dimensión.
-- **`code`** — código lineal sistemático de tasa 1/2 sobre GF(2), con checks de
-  grado 3. Redundancia algebraica, el caso crítico.
+- **`code`** — código lineal sistemático de tasa 1/2 sobre GF(2). Cada bit de
+  paridad es el XOR de 3 bits sistemáticos elegidos al azar (peso de columna 3
+  en `P`; equivalentemente, peso de fila 4 en la matriz de chequeo
+  `H = [Pᵀ | I]`). Redundancia algebraica, el caso crítico.
+
+## Por qué estas fuentes y no variantes de ellas
+
+Tres restricciones acotan el espacio de diseño de cualquier fuente del arnés, y
+conviene tenerlas explícitas porque son las que descartan la mayoría de las
+alternativas antes de discutirlas:
+
+1. **Alfabeto fijo.** Todas producen vectores en {−1,+1}⁵⁰⁰. Si una fuente
+   saliera de ese alfabeto, la escalera, la cota y la vara dejarían de ser
+   comparables entre fuentes.
+2. **Entropía exacta, no estimada.** El piso de Shannon se dibuja bajo cada
+   fuente. Una fuente cuya H solo se pueda estimar no puede llevar piso, y sin
+   piso el BER vuelve a no significar nada.
+3. **Redundancia demostrablemente explotable.** Cada fuente estructurada tiene
+   un oráculo constructivo que la explota. Sin él, un fracaso del autoencoder
+   sería ambiguo entre "no la vio" y "no había nada que ver".
+
+### `lowdim`: por qué `sign(Wz)`
+
+Sobre vectores binarios, "vive en un espacio de baja dimensión" admite
+exactamente dos lecturas, y ambas están en el arnés:
+
+- **Baja dimensión sobre GF(2)** — un subespacio lineal de {0,1}⁵⁰⁰. Eso *es*
+  un código lineal, por definición: la lectura la ocupa `code`.
+- **Baja dimensión sobre ℝ, proyectada al hipercubo** — un latente continuo
+  z ∈ ℝᵏ y un mapa a signos. Es `lowdim`.
+
+No hay una tercera. Las alternativas concretas que se consideraron mueren cada
+una por una razón distinta:
+
+| Alternativa | Por qué se descartó |
+|---|---|
+| Cuantizar `z` a *b* bits por coordenada | La salida deja de ser ±1: rompe el alfabeto común |
+| Señal de banda limitada muestreada, luego signo | Introduce localidad temporal, que ya miden `oversamp` y `markov` |
+| Mezcla de *M* centroides | Redundancia nominal, no geométrica; sin latente continuo ni relación entre Hamming y ángulo |
+| Vector disperso + proyección + signo | Añade la dispersión como segunda estructura, confundida con la dimensión |
+| `sign(f(z))` con `f` no lineal aleatoria | Sin entropía en forma cerrada: adiós al piso |
+
+El generador `sign(Wz)` no es una construcción *ad hoc*: es el modelo de
+medición de un bit, `y = sign(Ax)`, introducido por Boufounos y Baraniuk (2008),
+y el régimen de los ADCs de un bit en massive MIMO (Li et al., 2017). La
+identidad de hiperplanos aleatorios de Charikar (2002) —probabilidad de
+discrepancia de signo igual a θ/π— añade que el BER sobre esta fuente **mide
+error angular en ℝ³²** salvo un cambio de escala, de modo que la métrica no es
+solo la del campo sino la natural de la fuente. Detalle en
+[Bibliografía](04-bibliografia.md).
+
+**Límite declarado.** `W` es gaussiana i.i.d. —hiperplanos en posición general,
+que es la hipótesis bajo la cual el conteo de Cover es igualdad y no cota. Una
+matriz de canal real es correlacionada y dispersa en el dominio angular. La
+fuente modela la geometría de la medición, no la estadística de un canal.
+
+### `code`: por qué grado 3
+
+La elección original fue por hipótesis —se creía que grado 3 era donde el
+descenso de gradiente se rompe— y **esa hipótesis fue refutada** por el
+diagnóstico. La justificación correcta es otra, y es un estrujón por los dos
+lados:
+
+| grado | ¿PCA lo ve? | ¿lo ve una vara cuadrática? | ¿lo aprende un MLP supervisado? |
+|---|---|---|---|
+| 1 | **sí** | sí | sí (1.0000) |
+| 2 | no | **sí** | sí (1.0000) |
+| **3** | no | no | **sí (1.0000)** |
+| 4 | no | no | **no (0.4995)** |
+
+- **Grado 1 no es álgebra.** El bit de paridad es una copia; la covarianza tiene
+  un 1 fuera de la diagonal y PCA lo resuelve. Desaparecería el hallazgo firme
+  del proyecto.
+- **De grado 2 en adelante PCA queda ciego**, y esto es demostrable en una
+  línea: en representación ±1 el XOR es el producto, así que si xₚ = xᵢ·xⱼ
+  entonces E[xₚ·xᵢ] = E[xᵢ²·xⱼ] = E[xⱼ] = 0. Todas las correlaciones por pares
+  se anulan y la covarianza es la identidad.
+- **Grado 2 se descarta por la vara.** Una interacción bilineal la recupera un
+  mapa de características cuadrático, o simplemente probar los 31 125 pares. El
+  resultado sería vulnerable a "tu baseline era débil". Con grado 3 haría falta
+  un mapa cúbico —~2.6 × 10⁶ monomios por bit de paridad—, que ya no es una
+  extensión razonable de PCA sino el oráculo disfrazado.
+- **Grado 4 o más hace el resultado ininterpretable.** A grado 4 el MLP no
+  aprende ni con supervisión directa, así que el fracaso del autoencoder no
+  podría distinguirse de una barrera de aprendibilidad.
+
+**Grado 3 es el único valor simultáneamente demasiado alto para cualquier vara
+clásica razonable y suficientemente bajo para que el gradiente lo aprenda con
+supervisión.** Es lo que permite atribuir el fracaso al objetivo de
+reconstrucción y no a la dificultad de la fuente.
+
+**Por qué `P` aleatoria y no un código estructurado.** Un Hamming, BCH o
+Reed–Muller trae estructura cíclica o de cuerpo finito además de la paridad: si
+el autoencoder mejorara, no se sabría cuál explotó. Además `code` funciona como
+control de *no localidad* en el experimento de convolución precisamente porque
+`P` es aleatoria; un código de banda o cíclico invalidaría ese control. Y la
+construcción sistemática da k = 250 exacto, que los pares (n,k) de los códigos
+estructurados no alcanzan. Un LDPC estándar es la extensión declarada en
+[Hacia un paper](07-hacia-paper.md), no una alternativa descartada.
+
+**Lo que no está diseñado, y conviene declarar.** El peso de columna es
+exactamente 3, pero el peso de fila —en cuántos checks participa cada bit
+sistemático— es aleatorio, aproximadamente Poisson(3); algunos sistemáticos
+pueden no aparecer en ningún check. No es un ensemble LDPC regular ni una
+distribución optimizada. La distancia mínima nunca se verificó: no afecta al
+experimento, porque al ser sistemático H = 250 sale de la construcción
+cualquiera que sea el rango de `P`, y el oráculo transmite los sistemáticos. Se
+sortea una `P` por semilla, de modo que el resultado no cuelga de un código
+particular.
 
 ## Modos de entrenamiento
 
