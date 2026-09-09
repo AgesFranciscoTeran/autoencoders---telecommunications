@@ -7,6 +7,7 @@ Bitácora personal de trabajo: experimentos, decisiones, errores y correcciones.
 
 ## Empieza por aquí
 
+- **[Presentación](presentacion/index.html)** — 18 diapositivas para exponerlo en 20 minutos
 - **[Bitácora](docs/00-bitacora.md)** — el camino completo, etapa por etapa
 - **[Glosario](docs/06-glosario.md)** — todos los términos
 - **[Resultados](docs/03-resultados.md)** — qué está firme y qué no

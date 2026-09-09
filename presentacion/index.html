@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>¿Son viables los autoencoders para comprimir señales BPSK?</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/reset.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/reveal.min.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Serif:ital,wght@0,400;0,600;1,400&family=IBM+Plex+Sans:wght@300;400;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --paper: #FBFBF9;
+    --ink: #14171A;
+    --graphite: #3B3F44;
+    --mist: #7A7F85;
+    --rule: #D6D8D2;
+    --vara: #B8720F;
+    --zona: #1E8F6C;
+    --zona-wash: rgba(30, 143, 108, 0.10);
+    --vara-wash: rgba(184, 114, 15, 0.10);
+    --serif: "IBM Plex Serif", Georgia, "Times New Roman", serif;
+    --sans: "IBM Plex Sans", "Segoe UI", Helvetica, Arial, sans-serif;
+  }
+  html, body, .reveal { background: var(--paper); color: var(--ink); }
+  .reveal { font-family: var(--serif); font-size: 24px; line-height: 1.45; }
+  .reveal .slides section {
+    text-align: left;
+    padding: 0 0.8em;
+    box-sizing: border-box;
+  }
+  .reveal h1, .reveal h2 {
+    font-family: var(--serif);
+    font-weight: 600;
+    color: var(--ink);
+    text-transform: none;
+    letter-spacing: -0.01em;
+    text-shadow: none;
+    margin: 0 0 0.6em 0;
+  }
+  .reveal h1 { font-size: 2.1em; line-height: 1.12; max-width: 26ch; }
+  .reveal h2 { font-size: 1.55em; line-height: 1.18; max-width: 46ch; }
+  .reveal p { margin: 0 0 0.6em 0; max-width: 62ch; }
+  .reveal p.lede { font-size: 1.1em; color: var(--graphite); max-width: 48ch; }
+  .reveal p.note { font-family: var(--sans); font-size: 0.7em; color: var(--mist); max-width: 70ch; margin-top: 1.2em; }
+  .reveal em { font-style: italic; }
+  .reveal strong { font-weight: 600; }
+  .reveal code { font-family: var(--sans); font-size: 0.92em; background: #EEEFEB; padding: 0.05em 0.3em; border-radius: 3px; }
+
+  /* tablas: sans, numerales tabulares, sin cajas */
+  .reveal table {
+    font-family: var(--sans);
+    font-variant-numeric: tabular-nums;
+    font-size: 0.8em;
+    border-collapse: collapse;
+    margin: 0.4em 0 0.6em 0;
+    width: auto;
+  }
+  .reveal table th {
+    font-weight: 600;
+    text-align: left;
+    color: var(--graphite);
+    border-bottom: 1.5px solid var(--ink);
+    padding: 0.35em 1.1em 0.35em 0;
+  }
+  .reveal table td {
+    border-bottom: 1px solid var(--rule);
+    padding: 0.38em 1.1em 0.38em 0;
+    vertical-align: top;
+  }
+  .reveal table tr:last-child td { border-bottom: none; }
+  .reveal table td.num, .reveal table th.num { text-align: right; padding-right: 1.4em; }
+  .reveal table td.gana { color: var(--zona); font-weight: 600; }
+  .reveal table td.vara { color: var(--vara); font-weight: 600; }
+  .reveal table td.dim { color: var(--mist); }
+  .reveal table tr.hilite td { background: var(--zona-wash); }
+
+  /* dos columnas */
+  .cols { display: grid; grid-template-columns: 1fr 1fr; gap: 2em; align-items: start; }
+  .cols.wide-left { grid-template-columns: 3fr 2fr; }
+  .cols img { width: 100%; height: auto; border: 1px solid var(--rule); }
+
+  /* la unica diapositiva con numero grande */
+  .bignum { font-family: var(--sans); font-weight: 300; font-size: 4.6em; line-height: 1; letter-spacing: -0.02em; margin: 0.15em 0 0.05em 0; font-variant-numeric: tabular-nums; }
+  .bignum .zona { color: var(--zona); }
+  .bignum .vara { color: var(--vara); }
+  .bignum-label { font-family: var(--sans); font-size: 0.85em; color: var(--graphite); margin: 0 0 1.2em 0; }
+
+  /* franja de veredicto en la respuesta final */
+  .veredicto { border-left: 4px solid var(--zona); padding: 0.2em 0 0.2em 0.9em; margin: 0.8em 0; max-width: 56ch; }
+  .veredicto.no { border-left-color: var(--vara); }
+
+  .reveal .progress { color: var(--zona); height: 3px; }
+  .reveal .slide-number { font-family: var(--sans); font-size: 14px; color: var(--mist); background: transparent; }
+
+  .reveal .fragment.fade-in-then-semi-out.visible:not(.current-fragment) { opacity: 0.45; }
+
+  ul.plain { list-style: none; padding: 0; margin: 0; }
+  ul.plain li { margin: 0 0 0.5em 0; padding-left: 1.2em; text-indent: -1.2em; }
+  ul.plain li::before { content: "—"; color: var(--mist); display: inline-block; width: 1.2em; text-indent: 0; }
+
+  .titulo-fuente { font-family: var(--sans); color: var(--graphite); font-size: 0.85em; margin-top: 2.2em; }
+  .titulo-fuente a { color: var(--zona); text-decoration: none; border-bottom: 1px solid var(--zona); }
+
+  @media (prefers-reduced-motion: reduce) {
+    .reveal .slides section, .reveal .fragment { transition: none !important; }
+  }
+</style>
+</head>
+<body>
+<div class="reveal">
+<div class="slides">
+
+<!-- 1 -->
+<section>
+  <h1>¿Son viables los autoencoders para comprimir señales BPSK?</h1>
+  <p class="lede">Vectores de 500 símbolos ±1, un cuello de botella binario, y la pregunta de si un autoencoder le gana a lo que ya existe.</p>
+  <p class="titulo-fuente">Cuaderno completo, código y datos regenerables en <a href="../index.html">el sitio del proyecto</a>.</p>
+</section>
+
+<!-- 2 -->
+<section>
+  <h2>La pregunta, tal como se planteó, no tiene respuesta</h2>
+  <p>Con un latente de 500 bits el autoencoder aprende la identidad y da BER = 0. No comprimió nada.</p>
+  <p>Cualquier afirmación de viabilidad tiene que ser un par <strong>(tasa, BER)</strong>, y la tasa tiene que contarse en bits reales:</p>
+  <p>\[ R = \frac{\text{bits del latente}}{500} \]</p>
+  <p>Un latente de 50 dimensiones en <code>float32</code> son 1600 bits. Más que la fuente. Por eso el cuello es <strong>binario</strong>, con estimador straight-through.</p>
+</section>
+
+<!-- 3 -->
+<section>
+  <h2>Viable significa caer entre un piso y una vara</h2>
+  <div class="cols wide-left">
+    <div>
+      <p><strong>El piso</strong> es la cota inferior de Shannon para fuentes binarias con distorsión de Hamming. Nadie baja de ahí; violarla es un bug.</p>
+      <p>\[ D \;\ge\; H_b^{-1}\!\left(\frac{H(X)}{n} - R\right) \]</p>
+      <p><strong>La vara</strong> es el mejor método clásico con el mismo número de bits: PCA cuantizado, decimación, oráculos. Si el autoencoder no le gana, no aporta.</p>
+    </div>
+    <div>
+      <img src="../figs/zona_viabilidad.png" alt="Zona de viabilidad por fuente: franja entre la cota de Shannon y el mejor método clásico">
+      <p class="note">Franja verde: donde un autoencoder podría aportar. Sin ella no hay nada que ganar.</p>
+    </div>
+  </div>
+</section>
+
+<!-- 4 -->
+<section>
+  <h2>La compresibilidad es de la señal, no del autoencoder</h2>
+  <p>Cinco fuentes, elegidas para cubrir tipos distintos de redundancia, cada una con entropía <em>exacta</em> y un oráculo que demuestra que su redundancia es explotable.</p>
+  <table>
+    <tr><th>fuente</th><th>estructura</th><th class="num">H (bits)</th><th class="num">compresión máx.</th></tr>
+    <tr><td><code>random</code></td><td>ninguna, i.i.d.</td><td class="num">500.0</td><td class="num">1.00×</td></tr>
+    <tr><td><code>code</code></td><td>algebraica: paridades XOR de grado 3</td><td class="num">250.0</td><td class="num">2.00×</td></tr>
+    <tr><td><code>lowdim</code></td><td>geométrica: sign(Wz), z ∈ ℝ³²</td><td class="num">164.9</td><td class="num">3.03×</td></tr>
+    <tr><td><code>markov</code></td><td>correlacional: cadena con p = 0.05</td><td class="num">143.9</td><td class="num">3.47×</td></tr>
+    <tr><td><code>oversamp</code></td><td>repetición: 125 símbolos × 4</td><td class="num">125.0</td><td class="num">4.00×</td></tr>
+  </table>
+  <p class="note"><code>random</code> es el control negativo: cualquier método que parezca comprimirlo tiene una fuga. La entropía de <code>lowdim</code> sale del conteo de dicotomías de Cover, no de la dimensión del manifold.</p>
+</section>
+
+<!-- 5 -->
+<section>
+  <h2>La escalera de tasas corta las entropías de las fuentes</h2>
+  <p>Cuatro escalones: 35, 70, 125 y 250 bits. BER mínimo teórico en cada uno:</p>
+  <table>
+    <tr><th></th><th class="num">L = 35</th><th class="num">L = 70</th><th class="num">L = 125</th><th class="num">L = 250</th></tr>
+    <tr><td><code>random</code></td><td class="num">0.3455</td><td class="num">0.2834</td><td class="num">0.2145</td><td class="num">0.1100</td></tr>
+    <tr><td><code>code</code></td><td class="num">0.0881</td><td class="num">0.0684</td><td class="num">0.0417</td><td class="num gana">0</td></tr>
+    <tr><td><code>lowdim</code></td><td class="num">0.0439</td><td class="num">0.0291</td><td class="num">0.0099</td><td class="num gana">0</td></tr>
+    <tr><td><code>markov</code></td><td class="num">0.0348</td><td class="num">0.0211</td><td class="num">0.0040</td><td class="num gana">0</td></tr>
+    <tr><td><code>oversamp</code></td><td class="num">0.0272</td><td class="num">0.0146</td><td class="num gana">0</td><td class="num gana">0</td></tr>
+  </table>
+  <p>En verde, donde la compresión sin pérdida es teóricamente posible. L = 250 pregunta <em>¿alcanza el óptimo?</em>; los escalones bajos miden qué tan grácil es la degradación.</p>
+</section>
+
+<!-- 6 -->
+<section>
+  <h2>Medir honestamente costó nueve rondas de calibración</h2>
+  <p>La primera corrida completa dio BER 0.5000 sobre <code>oversamp</code> con 250 bits para una fuente de 125. Un resultado imposible: al autoencoder le sobraba el doble de capacidad.</p>
+  <ul class="plain">
+    <li>Se adoptó una <strong>prueba de calibración</strong> con respuesta conocida, como pesar un patrón de 1 kg antes de creerle a la balanza.</li>
+    <li>El fallo real era una <strong>inestabilidad de escala</strong> del latente binario, no la saturación que se sospechó primero.</li>
+    <li>Todo resultado de autoencoder se reporta sobre <strong>cuatro semillas</strong> que varían fuente e inicialización, con desviaciones típicas de 0.0003 a 0.0013.</li>
+  </ul>
+  <p class="note">Controles automáticos: nadie viola la cota, <code>random</code> no comprime, más bits siempre da menos BER.</p>
+</section>
+
+<!-- 7 -->
+<section>
+  <h2>El autoencoder ancho gana a lo clásico solo a tasas agresivas</h2>
+  <p>MLP de 1536 × 4, cuello binario. Seis configuraciones ganan a la vara en 4 de 4 semillas:</p>
+  <table>
+    <tr><th>fuente</th><th>modo</th><th class="num">L</th><th class="num">autoencoder</th><th class="num">vara</th><th class="num">margen</th><th class="num">significancia</th></tr>
+    <tr class="hilite"><td><code>lowdim</code></td><td>direct</td><td class="num">70</td><td class="num gana">0.1051 ± 0.0004</td><td class="num">0.1861</td><td class="num">+0.0810</td><td class="num">216 σ</td></tr>
+    <tr><td><code>lowdim</code></td><td>nested</td><td class="num">70</td><td class="num gana">0.1241 ± 0.0005</td><td class="num">0.1861</td><td class="num">+0.0620</td><td class="num">123 σ</td></tr>
+    <tr><td><code>markov</code></td><td>direct</td><td class="num">35</td><td class="num gana">0.1498 ± 0.0003</td><td class="num">0.1531</td><td class="num">+0.0033</td><td class="num">10 σ</td></tr>
+    <tr><td><code>lowdim</code></td><td>direct</td><td class="num">35</td><td class="num gana">0.1870 ± 0.0010</td><td class="num">0.1954</td><td class="num">+0.0084</td><td class="num">9 σ</td></tr>
+    <tr><td><code>markov</code></td><td>nested</td><td class="num">35</td><td class="num gana">0.1485 ± 0.0006</td><td class="num">0.1531</td><td class="num">+0.0046</td><td class="num">8 σ</td></tr>
+    <tr><td><code>markov</code></td><td>direct</td><td class="num">70</td><td class="num gana">0.0902 ± 0.0003</td><td class="num">0.0914</td><td class="num">+0.0012</td><td class="num">4 σ</td></tr>
+  </table>
+  <p>Solo con R ≤ 0.14 y solo sobre estructura geométrica o correlacional. En R ≥ 0.25, con esta arquitectura, no gana en ninguna fuente.</p>
+</section>
+
+<!-- 8 -->
+<section>
+  <h2>Esa frontera era una arquitectura, no una ley</h2>
+  <p>Escalera estrecha 500 → 250 → 125 → 70 → 35 contra el MLP ancho, <strong>mismo protocolo</strong>: pasos, tasa de aprendizaje y selección de checkpoint por validación. Cuatro semillas.</p>
+  <table>
+    <tr><th>caso</th><th class="num">vara</th><th class="num">MLP ancho</th><th class="num">escalera</th><th>quién gana a la vara</th></tr>
+    <tr><td><code>markov</code> L=35</td><td class="num">0.1531</td><td class="num">0.1564</td><td class="num vara">0.1979</td><td>ninguno con este protocolo</td></tr>
+    <tr><td><code>markov</code> L=125</td><td class="num">0.0488</td><td class="num vara">0.0614</td><td class="num gana">0.0464</td><td>escalera</td></tr>
+    <tr class="hilite"><td><code>markov</code> L=250</td><td class="num">0.0250</td><td class="num vara">0.0288</td><td class="num gana">0.0135</td><td>escalera, por 46 %</td></tr>
+    <tr><td><code>lowdim</code> L=250</td><td class="num">0.0492</td><td class="num vara">0.0553</td><td class="num gana">0.0386</td><td>escalera</td></tr>
+  </table>
+  <p>El signo se invierte con la tasa: el ancho gana comprimiendo agresivo, la escalera gana con holgura. Y la escalera es estable en 16 de 16 corridas; el ancho se degrada hasta 0.009 tras su pico.</p>
+</section>
+
+<!-- 9 -->
+<section>
+  <h2>El preentrenamiento por capas de Hinton funciona — contra la predicción</h2>
+  <p>RBM con divergencia contrastiva y decoder Wᵀ, o autoencoder superficial por capa, sobre la escalera. Predicción registrada antes de correr: no ayudaría. Resultado: gana en 16 de 16 celdas.</p>
+  <table>
+    <tr><th>caso</th><th class="num">aleatoria</th><th class="num">pre. AE</th><th class="num">pre. RBM</th><th class="num">vara</th><th class="num">mejora</th></tr>
+    <tr><td><code>lowdim</code> L=35</td><td class="num">0.2610</td><td class="num gana">0.1833</td><td class="num">0.1911</td><td class="num">0.1954</td><td class="num">29.8 %</td></tr>
+    <tr><td><code>lowdim</code> L=70</td><td class="num">0.1376</td><td class="num gana">0.1140</td><td class="num">0.1146</td><td class="num">0.1861</td><td class="num">17.2 %</td></tr>
+    <tr><td><code>markov</code> L=35</td><td class="num">0.1979</td><td class="num gana">0.1418</td><td class="num">0.1732</td><td class="num">0.1531</td><td class="num">28.3 %</td></tr>
+    <tr><td><code>markov</code> L=70</td><td class="num">0.1010</td><td class="num gana">0.0838</td><td class="num">0.0891</td><td class="num">0.0914</td><td class="num">17.0 %</td></tr>
+    <tr class="hilite"><td><code>markov</code> L=250</td><td class="num">0.0135</td><td class="num">0.0143</td><td class="num gana">0.0107</td><td class="num">0.0250</td><td class="num">20.7 %</td></tr>
+  </table>
+  <p>RBM y AE no son equivalentes: el AE gana a tasas bajas, la RBM a tasas altas. El objetivo de la etapa importa.</p>
+</section>
+
+<!-- 10: el numero -->
+<section>
+  <h2>El mejor punto no trivial roza el umbral operativo</h2>
+  <p class="bignum-label"><code>markov</code>, 250 bits, escalera con preentrenamiento RBM, cuatro semillas</p>
+  <div class="bignum"><span class="vara">0.0107</span> &nbsp;<span style="color:var(--mist);font-size:0.5em">BER total</span></div>
+  <div class="bignum"><span class="zona">0.0011</span> &nbsp;<span style="color:var(--mist);font-size:0.5em">en el 90 % de bits más confiables</span></div>
+  <p style="margin-top:1em">El umbral corregible por FEC es 10⁻². Con BER total no cruza, por siete diezmilésimas. Con salida blanda cruza por un orden de magnitud: el 10 % de bits restante tiene BER ≈ 0.097 y viene <strong>marcado como dudoso</strong> por su propio LLR.</p>
+  <p class="note">Lo que demuestra: una estructura de confianza favorable a decodificación blanda. Lo que no demuestra: el BER tras un LDPC real. Esa simulación queda como extensión.</p>
+</section>
+
+<!-- 11 -->
+<section>
+  <h2>Sobre redundancia algebraica, el autoencoder fracasa</h2>
+  <div class="cols wide-left">
+    <div>
+      <p><code>code</code> es 2× comprimible sin pérdida, y un oráculo que conoce la matriz de paridad lo demuestra. El autoencoder recorre el 21 % del camino:</p>
+      <table>
+        <tr><th>estrategia a L = 250</th><th class="num">BER</th></tr>
+        <tr><td>copiar la mitad, adivinar el resto</td><td class="num">0.2500</td></tr>
+        <tr><td>autoencoder</td><td class="num vara">0.1982</td></tr>
+        <tr><td>oráculo</td><td class="num gana">0.0000</td></tr>
+      </table>
+      <p>Medido contra su propia cota, queda <strong>más lejos del óptimo</strong> sobre la fuente comprimible (+0.198) que sobre ruido puro (+0.148).</p>
+    </div>
+    <div>
+      <img src="../figs/pca_ciego.png" alt="PCA da el mismo BER sobre el código de bloque que sobre ruido puro">
+      <p class="note">PCA es igual de ciego: diferencia dentro de 1σ sobre 10 semillas. Y el cociente BER/BER-top90 es 1.0: los errores están repartidos uniformemente, ni un FEC blando ayudaría.</p>
+    </div>
+  </div>
+</section>
+
+<!-- 12 -->
+<section>
+  <h2>Y no es porque no pueda aprender paridad</h2>
+  <p>La hipótesis inicial: el descenso de gradiente no aprende XOR de grado 3. Se construyó un diagnóstico para demostrarla, y la refutó.</p>
+  <table>
+    <tr><th class="num">grado del XOR</th><th class="num">exactitud de test, 500 bits de entrada</th></tr>
+    <tr><td class="num">1</td><td class="num">1.0000</td></tr>
+    <tr><td class="num">2</td><td class="num">1.0000</td></tr>
+    <tr class="hilite"><td class="num">3</td><td class="num gana">1.0000</td></tr>
+    <tr><td class="num">4</td><td class="num vara">0.4995</td></tr>
+  </table>
+  <p>Con supervisión directa un MLP aprende el grado 3 perfectamente. Lo que falla en el autoencoder es que la <strong>pérdida de reconstrucción no genera un camino de gradiente</strong> hacia 250 funciones de paridad simultáneas. El obstáculo es el objetivo, no la capacidad.</p>
+  <p class="note">Un piloto con 60 000 muestras y 25 épocas había dado 0.5069 en grado 3 — azar. Con ocho veces más pasos, 1.0000. Un negativo con presupuesto corto es indistinguible de uno real.</p>
+</section>
+
+<!-- 13 -->
+<section>
+  <h2>Los latentes binarios se autodestruyen si no se acota la escala</h2>
+  <div class="cols">
+    <div>
+      <p>Con <code>sign()</code> hacia adelante, escalar las preactivaciones no cambia la salida: la pérdida es ciega a la escala. Hacia atrás no lo es. Los pesos crecen sin castigo mientras matan su propio gradiente.</p>
+      <p>Un modelo llegó a BER 0.0003 en la época 60 y estaba en 0.4725 en la 150, con el 47 % de los bits muertos.</p>
+    </div>
+    <div>
+      <table>
+        <tr><th>normalización antes del signo</th><th class="num">pre_max</th><th class="num">BER final</th></tr>
+        <tr class="hilite"><td>BatchNorm sin afín</td><td class="num">3.8</td><td class="num gana">0.0000</td></tr>
+        <tr><td>LayerNorm sin afín</td><td class="num">13.3</td><td class="num">0.0640</td></tr>
+        <tr><td>tanh</td><td class="num">16.9</td><td class="num">0.1706</td></tr>
+        <tr><td>LayerNorm con afín</td><td class="num">28.6</td><td class="num vara">0.1167</td></tr>
+      </table>
+      <p class="note">La magnitud de las preactivaciones correlaciona monótonamente con el BER. BatchNorm normaliza cada bit por separado sobre el batch: realimentación negativa por dimensión.</p>
+    </div>
+  </div>
+</section>
+
+<!-- 14 -->
+<section>
+  <h2>La redundancia del latente es capacidad excedente</h2>
+  <p>Entropía del latente medida con un modelo autoregresivo, verificada contra la cota de Fano. Cuando sobran bits, el autoencoder los desperdicia; cuando faltan, el latente es casi incompresible.</p>
+  <table>
+    <tr><th>fuente</th><th class="num">L</th><th class="num">L / H<sub>fuente</sub></th><th class="num">redundancia del latente</th></tr>
+    <tr><td><code>oversamp</code></td><td class="num">250</td><td class="num">2.00</td><td class="num vara">36.1 %</td></tr>
+    <tr><td><code>markov</code></td><td class="num">250</td><td class="num">1.74</td><td class="num">33.8 %</td></tr>
+    <tr><td><code>markov</code></td><td class="num">70</td><td class="num">0.49</td><td class="num">16.3 %</td></tr>
+    <tr><td><code>lowdim</code></td><td class="num">70</td><td class="num">0.42</td><td class="num">3.6 %</td></tr>
+    <tr><td><code>lowdim</code></td><td class="num">35</td><td class="num">0.21</td><td class="num gana">1.0 %</td></tr>
+  </table>
+  <p>A tasas bajas, donde el autoencoder gana, no hay nada que ganar por codificación entrópica. La tasa nominal es honesta justo donde importa.</p>
+</section>
+
+<!-- 15 -->
+<section>
+  <h2>Seis predicciones registradas antes de medir, seis refutadas</h2>
+  <table>
+    <tr><th>se predijo</th><th>salió</th></tr>
+    <tr class="fragment fade-in-then-semi-out"><td>la tanh se satura y mata el gradiente</td><td>saturación bajo el 5 %; el fallo era la escala</td></tr>
+    <tr class="fragment fade-in-then-semi-out"><td>SGD no aprende XOR de grado 3</td><td>exactitud 1.0000 con datos suficientes</td></tr>
+    <tr class="fragment fade-in-then-semi-out"><td>más datos mejoran un 14.5 %</td><td>eran más pasos, no más datos; saturado desde 400k</td></tr>
+    <tr class="fragment fade-in-then-semi-out"><td>la convolución no cambia nada en <code>lowdim</code></td><td>empeora un 21 %: sin localidad, pierde mezcla global</td></tr>
+    <tr class="fragment fade-in-then-semi-out"><td>el preentrenamiento por capas no ayuda</td><td>gana en 16 de 16 celdas</td></tr>
+    <tr class="fragment fade-in-then-semi-out"><td>ajuste fino con tasa pequeña conserva el pico</td><td>74 % peor por subentrenamiento</td></tr>
+  </table>
+  <p class="fragment">Y tres conclusiones ya escritas se revisaron: la frontera en R ≈ 0.25, la etiqueta «receta de Hinton» sobre el modo apilado, y una victoria de 4σ que resultó sensible al protocolo.</p>
+</section>
+
+<!-- 16 -->
+<section>
+  <h2>La respuesta</h2>
+  <div class="veredicto no">
+    <p><strong>No son viables a tasas agresivas.</strong> Con el umbral de 10⁻², 18 de 20 puntos del barrido principal quedan fuera; el mejor caso no trivial equivale a un enlace a 2.2 dB.</p>
+  </div>
+  <div class="veredicto">
+    <p><strong>Sí son viables en una franja estrecha con decisión blanda.</strong> <code>markov</code> a 250 bits, escalera y RBM: 0.0107 total, 0.0011 en el 90 % más confiable.</p>
+  </div>
+  <p>Y superan a los métodos clásicos en casi todo el mapa de <code>markov</code> y <code>lowdim</code> si la arquitectura se elige por tasa: ancho para comprimir agresivo, escalera con holgura. Sobre redundancia algebraica fracasan, por el objetivo y no por la capacidad.</p>
+</section>
+
+<!-- 17 -->
+<section>
+  <h2>Lo que queda abierto</h2>
+  <ul class="plain">
+    <li><strong>Un objetivo auxiliar que supervise la estructura algebraica.</strong> Si el obstáculo en <code>code</code> es el objetivo, cámbiese el objetivo. Es la extensión más valiosa.</li>
+    <li><strong>Simulación post-FEC con un LDPC real</strong> sobre los LLR de <code>markov</code> L=250. Convierte «favorable a decisión blanda» en una cifra operativa.</li>
+    <li><strong>Señales reales.</strong> Las fuentes sintéticas permiten cotas exactas, que es fortaleza; pero un paper aplicado necesita al menos un caso con datos de campo.</li>
+    <li><strong>Barrido de anchos intermedios</strong> entre la escalera y el MLP de 1536, para ubicar dónde se invierte el signo de la interacción con la tasa.</li>
+  </ul>
+  <p class="note">Y un control pendiente: cómputo igualado para el preentrenamiento. La brecha del 28 % no se explica con 40 000 pasos de capas de dos segundos, pero es una hipótesis, no una medida.</p>
+</section>
+
+<!-- 18 -->
+<section>
+  <h1>Todo lo que hay aquí es regenerable</h1>
+  <p class="lede">Cotas y baselines en segundos sin GPU; barrido de autoencoders con calibración obligatoria y reanudación. Cada número del cuaderno tiene fecha, semillas, versiones y hash del script que lo produjo.</p>
+  <p class="titulo-fuente"><a href="../index.html">Cuaderno del proyecto</a> &nbsp;·&nbsp; <a href="../docs/00-bitacora.html">Bitácora completa</a> &nbsp;·&nbsp; <a href="../docs/07-hacia-paper.html">Preguntas abiertas</a></p>
+</section>
+
+</div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/reveal.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/plugin/math/math.min.js"></script>
+<script>
+  Reveal.initialize({
+    width: 1280,
+    height: 720,
+    margin: 0.06,
+    center: false,
+    hash: true,
+    transition: 'fade',
+    transitionSpeed: 'fast',
+    backgroundTransition: 'none',
+    slideNumber: 'c/t',
+    controls: true,
+    controlsTutorial: false,
+    progress: true,
+    math: {
+      mathjax: 'https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/MathJax.js',
+      config: 'TeX-AMS_HTML-full',
+      TeX: { Macros: {} }
+    },
+    plugins: [ RevealMath ]
+  });
+</script>
+</body>
+</html>

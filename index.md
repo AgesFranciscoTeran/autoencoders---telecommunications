@@ -18,6 +18,8 @@ todo desde cero.
 
 Si vengo a retomar esto después de un tiempo:
 
+0. **[Presentación](presentacion/index.html)** — 18 diapositivas para exponer el
+   proyecto en 20 minutos. Flechas para avanzar, `F` para pantalla completa.
 1. **[Bitácora](docs/00-bitacora.md)** — el camino completo, etapa por etapa:
    qué creíamos, qué lo rompió, qué cambiamos. Es la página que reconstruye todo
    el razonamiento.
