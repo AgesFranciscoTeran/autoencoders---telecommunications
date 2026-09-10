@@ -94,6 +94,18 @@
   .veredicto { border-left: 4px solid var(--zona); padding: 0.2em 0 0.2em 0.9em; margin: 0.8em 0; max-width: 66ch; }
   .veredicto.no { border-left-color: var(--vara); }
 
+  /* diagrama de la cadena de codificación */
+  .cadena { width: 100%; height: auto; display: block; margin: 0.1em 0 0.9em 0; font-family: var(--sans); }
+  .cadena rect { fill: none; stroke: var(--rule); stroke-width: 1.5; }
+  .cadena rect.clave { fill: var(--zona-wash); stroke: var(--zona); }
+  .cadena text { font-size: 17px; fill: var(--graphite); text-anchor: middle; }
+  .cadena text.clave { fill: var(--zona); font-weight: 600; }
+  .cadena path { fill: var(--mist); }
+  .cadena line.flecha { stroke: var(--mist); stroke-width: 1.5; }
+  .subcab { font-family: var(--sans); font-size: 0.8em; font-weight: 600; color: var(--graphite);
+            margin: 0 0 0.5em 0; padding-top: 0.4em; border-top: 1.5px solid var(--ink); }
+  section.piezas p { font-size: 0.85em; max-width: none; }
+
   /* diagrama de la escalera anidada */
   .anidado { width: 100%; max-width: 640px; height: auto; display: block; margin: 0.2em 0 0.6em 0; font-family: var(--sans); }
   .anidado rect.full { fill: var(--rule); }
@@ -177,6 +189,42 @@
 </section>
 
 <!-- 2 -->
+<section class="piezas">
+  <h2>Las piezas: cuantizador, vara y ruido</h2>
+  <svg class="cadena" viewBox="0 0 1100 62" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Cadena: fuente de 500 bits, encoder, cuantizador de un bit por dimensión, L bits, decoder, decisión por signo">
+    <rect x="0" y="6" width="160" height="42"/><text x="80" y="33">fuente · 500</text>
+    <line class="flecha" x1="162" y1="27" x2="192" y2="27"/><path d="M192 22 l10 5 -10 5 z"/>
+    <rect x="200" y="6" width="150" height="42"/><text x="275" y="33">encoder</text>
+    <line class="flecha" x1="352" y1="27" x2="382" y2="27"/><path d="M382 22 l10 5 -10 5 z"/>
+    <rect class="clave" x="390" y="6" width="200" height="42"/><text class="clave" x="490" y="33">sign( · ) · 1 bit/dim</text>
+    <line class="flecha" x1="592" y1="27" x2="622" y2="27"/><path d="M622 22 l10 5 -10 5 z"/>
+    <rect x="630" y="6" width="130" height="42"/><text x="695" y="33">L bits</text>
+    <line class="flecha" x1="762" y1="27" x2="792" y2="27"/><path d="M792 22 l10 5 -10 5 z"/>
+    <rect x="800" y="6" width="150" height="42"/><text x="875" y="33">decoder</text>
+    <line class="flecha" x1="952" y1="27" x2="982" y2="27"/><path d="M982 22 l10 5 -10 5 z"/>
+    <rect x="990" y="6" width="110" height="42"/><text x="1045" y="33">signo</text>
+  </svg>
+  <div class="cols">
+    <div>
+      <p class="subcab">El cuantizador que lleva el modelo</p>
+      <p>El cuello es <strong>binario</strong>: cada dimensión del latente pasa por <code>sign()</code>, un cuantizador de un bit. L dimensiones son exactamente L bits, así que la tasa es contable por construcción.</p>
+      <p><code>sign()</code> no tiene derivada útil. <strong>Straight-through</strong>: hacia adelante el signo, hacia atrás la identidad recortada a |u| ≤ 1, para que las unidades ya saturadas no sigan empujando.</p>
+      <p>Antes del signo, <strong>BatchNorm sin parámetros afines</strong>. Sin eso el latente se autodestruye, y el mecanismo está medido.</p>
+    </div>
+    <div>
+      <p class="subcab">El cuantizador de la vara, y el ruido</p>
+      <p>El PCA no compite en dimensiones sino en bits: <strong>d componentes de b bits</strong> con d·b = L, cuantización uniforme sobre el rango de entrenamiento, b ∈ {1, 2, 4}, y se reporta la mejor. Sin cuantizar haría la misma trampa que un latente continuo.</p>
+      <p><strong>Ruido de canal: no hay.</strong> El arnés final mide compresión sin AWGN. El intento de JSCC fue de v2 y quedó fuera; la razón, en la diapositiva de alcance.</p>
+      <p>Donde sí hay aleatoriedad: <code>random</code>, la fuente i.i.d. que sirve de control negativo, y el muestreo Bernoulli de la RBM en el preentrenamiento.</p>
+    </div>
+  </div>
+  <aside class="notes">
+    Responde de entrada la duda razonable: qué se cuantiza y dónde está el ruido. Dos cuantizadores distintos, uno dentro del modelo y otro dentro de la vara, y ningún canal en el barrido final. La única mención a Eb/N0 en el arnés v4 es un comentario sobre lo que se quitó de v3.
+    Si pregunta por el recorte del straight-through: sin él, una unidad con |u| grande sigue recibiendo gradiente aunque su signo ya no vaya a cambiar, y eso alimenta justo la inestabilidad de escala.
+  </aside>
+</section>
+
+<!-- 3 -->
 <section>
   <h2>De dónde venimos: el encargo y cuatro versiones</h2>
   <p>El encargo: 500 símbolos BPSK, un encoder que los comprima lo más posible, un decoder que recupere signos y posiciones, y una métrica de telecomunicaciones para decidir si es viable.</p>
@@ -194,11 +242,11 @@
   </aside>
 </section>
 
-<!-- 3 -->
+<!-- 4 -->
 <section>
   <h2>Lo que vamos a ver hoy, y en qué orden</h2>
   <ul class="plain">
-    <li><strong>Encuadre.</strong> Por qué la pregunta original no tenía respuesta, qué significa «viable», qué se mide y qué se deja fuera.</li>
+    <li><strong>Encuadre.</strong> Las piezas del montaje, por qué la pregunta original no tenía respuesta, qué significa «viable», qué se mide y qué se deja fuera.</li>
     <li><strong>Diseño experimental.</strong> Las fuentes, la escalera de tasas, los tres modos de entrenamiento, la configuración y la calibración.</li>
     <li><strong>Resultados del barrido.</strong> Dónde gana el autoencoder, dónde no, y cómo dos experimentos de cierre movieron la frontera.</li>
     <li><strong>El resultado negativo.</strong> Sobre redundancia algebraica fracasa, y por qué.</li>
@@ -211,7 +259,7 @@
   </aside>
 </section>
 
-<!-- 4 -->
+<!-- 5 -->
 <section>
   <h2>La pregunta, tal como se planteó, no tiene respuesta</h2>
   <p>Con un latente de 500 bits el autoencoder aprende la identidad y da BER = 0. No comprimió nada.</p>
@@ -223,7 +271,7 @@
   </aside>
 </section>
 
-<!-- 5 -->
+<!-- 6 -->
 <section>
   <h2>Viable significa caer entre un piso y una vara</h2>
   <div class="cols wide-left">
@@ -242,7 +290,7 @@
   </aside>
 </section>
 
-<!-- 6 -->
+<!-- 7 -->
 <section>
   <h2>Por qué BER, y por qué el umbral está en 10⁻²</h2>
   <div class="cols">
@@ -268,7 +316,7 @@
   </aside>
 </section>
 
-<!-- 7 -->
+<!-- 8 -->
 <section class="wide">
   <h2>Alcance: esto es codificación de fuente. El canal queda fuera, y por qué</h2>
   <p>Todo lo que sigue mide <code>fuente → encoder → L bits → decoder → reconstrucción</code>, sin ruido en medio. La pregunta es de compresión, y con canal se mezclan dos efectos que hay que separar.</p>
@@ -282,7 +330,7 @@
 
 <!-- ═══════════════════════ B · DISEÑO EXPERIMENTAL ═══════════════════════ -->
 
-<!-- 8 -->
+<!-- 9 -->
 <section>
   <h2>La compresibilidad es de la señal, no del autoencoder</h2>
   <p>Cinco fuentes, elegidas para cubrir tipos distintos de redundancia, cada una con entropía <em>exacta</em> y un oráculo que demuestra que su redundancia es explotable.</p>
@@ -300,7 +348,7 @@
   </aside>
 </section>
 
-<!-- 9 -->
+<!-- 10 -->
 <section>
   <h2>La escalera de tasas corta las entropías de las fuentes</h2>
   <p>Cuatro escalones: 35, 70, 125 y 250 bits. BER mínimo teórico en cada uno:</p>
@@ -318,7 +366,7 @@
   </aside>
 </section>
 
-<!-- 10 -->
+<!-- 11 -->
 <section>
   <h2>Tres modos de entrenamiento, y qué significa «anidado»</h2>
   <div class="cols">
@@ -349,7 +397,7 @@
   </aside>
 </section>
 
-<!-- 11 -->
+<!-- 12 -->
 <section>
   <h2>Configuración: el barrido principal y los experimentos de cierre</h2>
   <table class="compact">
@@ -370,7 +418,7 @@
   </aside>
 </section>
 
-<!-- 12 -->
+<!-- 13 -->
 <section>
   <h2>Medir honestamente costó nueve rondas de calibración</h2>
   <div class="cols">
@@ -398,7 +446,7 @@
 
 <!-- ═══════════════════════ C · RESULTADOS DEL BARRIDO ═══════════════════════ -->
 
-<!-- 13 -->
+<!-- 14 -->
 <section>
   <h2>El autoencoder ancho gana a lo clásico solo a tasas agresivas</h2>
   <p>MLP de 1536 × 4, cuello binario. Seis configuraciones ganan a la vara en 4 de 4 semillas:</p>
@@ -414,7 +462,7 @@
   <p>Solo con R ≤ 0.14 y solo sobre estructura geométrica o correlacional. En R ≥ 0.25, con esta arquitectura, no gana en ninguna fuente.</p>
 </section>
 
-<!-- 14 -->
+<!-- 15 -->
 <section>
   <h2>Esa frontera era una arquitectura, no una ley</h2>
   <p>Escalera estrecha 500 → 250 → 125 → 70 → 35 contra el MLP ancho, <strong>mismo protocolo</strong>: pasos, tasa de aprendizaje y selección de checkpoint por validación. Cuatro semillas.</p>
@@ -428,7 +476,7 @@
   <p>El signo se invierte con la tasa: el ancho gana comprimiendo agresivo, la escalera gana con holgura. Y la escalera es estable en 16 de 16 corridas; el ancho se degrada hasta 0.009 tras su pico.</p>
 </section>
 
-<!-- 15 -->
+<!-- 16 -->
 <section>
   <h2>El preentrenamiento por capas de Hinton funciona, contra la predicción</h2>
   <div class="cols wide-left">
@@ -458,7 +506,7 @@
   </aside>
 </section>
 
-<!-- 16: el numero -->
+<!-- 17: el numero -->
 <section>
   <h2>El mejor punto no trivial roza el umbral operativo</h2>
   <p class="bignum-label"><code>markov</code>, 250 bits, escalera con preentrenamiento RBM, cuatro semillas</p>
@@ -470,7 +518,7 @@
 
 <!-- ═══════════════════════ D · EL RESULTADO NEGATIVO ═══════════════════════ -->
 
-<!-- 17 -->
+<!-- 18 -->
 <section>
   <h2>Sobre redundancia algebraica, el autoencoder fracasa</h2>
   <div class="cols wide-left">
@@ -491,7 +539,7 @@
   </div>
 </section>
 
-<!-- 18 -->
+<!-- 19 -->
 <section>
   <h2>Y no es porque no pueda aprender paridad</h2>
   <p>La hipótesis inicial: el descenso de gradiente no aprende XOR de grado 3. Se construyó un diagnóstico para demostrarla, y la refutó.</p>
@@ -508,7 +556,7 @@
 
 <!-- ═══════════════════════ E · HALLAZGOS DE MÉTODO ═══════════════════════ -->
 
-<!-- 19 -->
+<!-- 20 -->
 <section>
   <h2>Los latentes binarios se autodestruyen si no se acota la escala</h2>
   <div class="cols">
@@ -532,7 +580,7 @@
   </aside>
 </section>
 
-<!-- 20 -->
+<!-- 21 -->
 <section>
   <h2>La redundancia del latente es capacidad excedente</h2>
   <p>Entropía del latente medida con un modelo autoregresivo, verificada contra la cota de Fano. Cuando sobran bits, el autoencoder los desperdicia; cuando faltan, el latente es casi incompresible.</p>
@@ -549,7 +597,7 @@
 
 <!-- ═══════════════════════ F · LA RESPUESTA ═══════════════════════ -->
 
-<!-- 21 -->
+<!-- 22 -->
 <section>
   <h2>Seis predicciones registradas antes de medir, seis refutadas</h2>
   <table>
@@ -564,7 +612,7 @@
   <p class="fragment">Y tres conclusiones ya escritas se revisaron: la frontera en R ≈ 0.25, la etiqueta «receta de Hinton» sobre el modo apilado, y una victoria de 4σ que resultó sensible al protocolo.</p>
 </section>
 
-<!-- 22 -->
+<!-- 23 -->
 <section>
   <h2>La respuesta</h2>
   <div class="veredicto no">
@@ -579,7 +627,7 @@
   </aside>
 </section>
 
-<!-- 23 -->
+<!-- 24 -->
 <section>
   <h2>Lo que queda abierto</h2>
   <ul class="plain">
@@ -591,7 +639,7 @@
   <p class="note">Y un control pendiente: cómputo igualado para el preentrenamiento. La brecha del 28 % no se explica con 40 000 pasos de capas de dos segundos, pero es una hipótesis, no una medida.</p>
 </section>
 
-<!-- 24 -->
+<!-- 25 -->
 <section>
   <h1>Todo lo que hay aquí es regenerable</h1>
   <p class="lede">Cotas y baselines en segundos sin GPU; barrido de autoencoders con calibración obligatoria y reanudación. Cada número del cuaderno tiene fecha, semillas, versiones y hash del script que lo produjo.</p>
