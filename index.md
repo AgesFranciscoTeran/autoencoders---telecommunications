@@ -18,7 +18,7 @@ todo desde cero.
 
 Si vengo a retomar esto después de un tiempo:
 
-0. **[Presentación](presentacion/index.html)** — Presentacion didactica. También como
+0. **[Presentación]** — Presentacion didactica. También como
    [PDF](presentacion/presentacion-autoencoders-bpsk.pdf).
 1. **[Bitácora](docs/00-bitacora.md)** — el camino completo, etapa por etapa:
    qué creíamos, qué lo rompió, qué cambiamos. Es la página que reconstruye todo
