@@ -44,27 +44,40 @@ inviabilidad es de las tasas agresivas, no de todo el mapa.
 
 ## Pero hay una franja donde sí superan a lo clásico
 
-Seis configuraciones ganan al mejor método clásico en **4 de 4 semillas**:
+Seis configuraciones ganan al mejor método clásico en **4 de 4 semillas**, con
+la vara recalculada (ver «La vara estaba débil», más abajo):
 
-| fuente | modo | L | AE | vara | margen | significancia |
-|---|---|---|---|---|---|---|
-| lowdim | direct | 70 | 0.1051 ± 0.0004 | 0.1861 | +0.0810 | 216 σ |
-| lowdim | nested | 70 | 0.1241 ± 0.0005 | 0.1861 | +0.0620 | 123 σ |
-| markov | direct | 35 | 0.1498 ± 0.0003 | 0.1531 | +0.0033 | 10 σ |
-| lowdim | direct | 35 | 0.1870 ± 0.0010 | 0.1954 | +0.0084 | 9 σ |
-| markov | nested | 35 | 0.1485 ± 0.0006 | 0.1531 | +0.0046 | 8 σ |
-| markov | direct | 70 | 0.0902 ± 0.0003 | 0.0914 | +0.0012 | 4 σ |
+| fuente | L | autoencoder | vara | margen |
+|---|---|---|---|---|
+| `markov` | 250 | **0.0107** | 0.0250 | **+0.0143** (57 %) |
+| `lowdim` | 35 | 0.1870 | 0.1932 | +0.0062 |
+| `lowdim` | 250 | 0.0346 | 0.0403 | +0.0057 |
+| `markov` | 35 | 0.1498 | 0.1529 | +0.0031 |
+| `markov` | 125 | 0.0464 | 0.0490 | +0.0026 |
+| `markov` | 70 | 0.0902 | 0.0915 | +0.0013 |
 
-Estas seis victorias son del MLP ancho de v4 (1536×4). Con esa arquitectura la
-ventaja aparece solo a **tasas agresivas** (R ≤ 0.14) sobre **estructura
-geométrica o correlacional**, y desaparece en R ≥ 0.25.
+Y dos configuraciones **pierden** con la vara corregida, ambas en la zona media
+de `lowdim`:
 
-**Esa frontera resultó ser un artefacto de arquitectura.** Ver más abajo: con
-una escalera estrecha, el autoencoder gana también a tasas altas.
+| fuente | L | autoencoder | vara | |
+|---|---|---|---|---|
+| `lowdim` | 70 | 0.1051 | **0.0977** | pierde por 0.0074 |
+| `lowdim` | 125 | 0.0607 | **0.0513** | pierde por 0.0094 |
 
-La tensión que define el proyecto: **el autoencoder gana justo en el régimen
-donde ningún método alcanza calidad de enlace.** Superar a PCA por un 43 % no
-importa si ambos están dos órdenes de magnitud por encima del mínimo operativo.
+El patrón que queda es más nítido que el anterior:
+
+> **Sobre estructura correlacional (`markov`) el autoencoder gana a las cuatro
+> tasas. Sobre estructura geométrica (`lowdim`) gana solo en los extremos: en la
+> zona media, PCA con cuantizador óptimo lo supera.**
+
+Tiene explicación. `lowdim` es sign(Wz), una fuente **casi lineal**, que es el
+terreno de PCA — Baldi y Hornik otra vez, pero ahora con la vara bien puesta.
+`markov` tiene correlación local que PCA no captura, y ahí la vara real no es
+PCA sino la decimación.
+
+El punto más fuerte del proyecto pasa a ser **`markov` L=250 con
+preentrenamiento RBM**: margen del 57 % y, además, el único punto no trivial que
+roza el umbral operativo. El mejor resultado es también el más útil.
 
 ### Control negativo
 
@@ -72,6 +85,56 @@ importa si ambos están dos órdenes de magnitud por encima del mínimo operativ
 la tabla (0.2453 a 0.2611, sd 0.0066). Es ruido oscilando alrededor de la vara,
 que es exactamente lo que debe ocurrir sobre datos incompresibles. Una victoria
 consistente ahí habría invalidado el experimento.
+
+---
+
+## La vara estaba débil, y eso invalidó dos victorias
+
+El baseline de PCA cuantizaba las proyecciones con un rango **min/max de las
+muestras de entrenamiento**. Ese rango crece con el número de muestras —se
+observan colas más extremas— así que los intervalos se ensanchan y la vara
+empeora cuantos más datos se le dan:
+
+| n_train | rango min/max | rango por percentiles |
+|---|---|---|
+| 20 000 | 0.1772 | 0.1316 |
+| 100 000 | 0.1836 | 0.1318 |
+| 400 000 | **0.1866** | 0.1317 |
+
+Un baseline que depende del tamaño de muestra no es un baseline. Y explica por
+qué circulaban dos valores para `lowdim` L=70: 0.1776 venía de las tablas
+generadas con 20 000 muestras y 0.1861 del barrido con 400 000.
+
+Se recalculó con el cuantizador escalar óptimo en MSE (Lloyd-Max por
+componente, ajustado en entrenamiento) y, por si la reconstrucción también era
+subóptima, con **síntesis por mínimos cuadrados** en lugar de transponer la
+base:
+
+| | uniforme + Vᵀ | uniforme + LS | Lloyd + Vᵀ | Lloyd + LS |
+|---|---|---|---|---|
+| `lowdim` L=70 | 0.0985 | 0.0985 | **0.0977** | 0.0977 |
+| `markov` L=250 | 0.0311 | 0.0311 | 0.0307 | 0.0307 |
+
+La síntesis por mínimos cuadrados **no mejora nada** en ninguna de las 16
+celdas, lo cual es esperable: con PCA la base de análisis es ortonormal, así que
+la transpuesta ya era la síntesis óptima. Dos rondas independientes de
+fortalecimiento convergen al mismo número, de modo que el resultado ya no es
+plausiblemente atribuible a un baseline débil.
+
+**Consecuencia.** La vara de `lowdim` L=70 pasó de 0.1861 a **0.0977**, y con
+ella cayó la victoria que se había reportado a 216 σ. `lowdim` L=125 también
+cae. Quedan 6 de 8.
+
+**Asimetría que conviene declarar.** Las varas se recalcularon *después* de
+medir el autoencoder, con una implementación mejor. No es injusto —la vara no
+depende del autoencoder ni se ajustó mirando sus resultados— pero el orden
+cronológico debe constar.
+
+**Límite conocido.** El cuantizador es óptimo en MSE de la proyección, no en
+BER. Uno que minimizara BER directamente podría ser algo más fuerte; es un
+problema discreto no convexo sin solución estándar. La evidencia sugiere
+retornos decrecientes: de min/max a percentiles el cambio fue grande, de
+percentiles a Lloyd pequeño, y de Lloyd a mínimos cuadrados nulo.
 
 ---
 

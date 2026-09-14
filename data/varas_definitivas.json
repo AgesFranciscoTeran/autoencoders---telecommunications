@@ -1,0 +1,178 @@
+[
+ {
+  "fuente": "lowdim",
+  "latente_bits": 35,
+  "ber_unif_transp": 0.1932155,
+  "ber_unif_ls": 0.1933363,
+  "ber_lloyd_transp": 0.1931982,
+  "ber_lloyd_ls": 0.1933324,
+  "ber_decim": NaN,
+  "ber_baseline": 0.1931982,
+  "metodo": "lloyd_transp d=35 b=1"
+ },
+ {
+  "fuente": "lowdim",
+  "latente_bits": 70,
+  "ber_unif_transp": 0.0984891,
+  "ber_unif_ls": 0.0985288,
+  "ber_lloyd_transp": 0.0977156,
+  "ber_lloyd_ls": 0.0977416,
+  "ber_decim": NaN,
+  "ber_baseline": 0.0977156,
+  "metodo": "lloyd_transp d=35 b=2"
+ },
+ {
+  "fuente": "lowdim",
+  "latente_bits": 125,
+  "ber_unif_transp": 0.0524718,
+  "ber_unif_ls": 0.0524588,
+  "ber_lloyd_transp": 0.0513276,
+  "ber_lloyd_ls": 0.0513308,
+  "ber_decim": NaN,
+  "ber_baseline": 0.0513276,
+  "metodo": "lloyd_transp d=31 b=4"
+ },
+ {
+  "fuente": "lowdim",
+  "latente_bits": 250,
+  "ber_unif_transp": 0.0412516,
+  "ber_unif_ls": 0.0413089,
+  "ber_lloyd_transp": 0.0402775,
+  "ber_lloyd_ls": 0.0402906,
+  "ber_decim": NaN,
+  "ber_baseline": 0.0402775,
+  "metodo": "lloyd_transp d=62 b=4"
+ },
+ {
+  "fuente": "markov",
+  "latente_bits": 35,
+  "ber_unif_transp": 0.1777544,
+  "ber_unif_ls": 0.1778183,
+  "ber_lloyd_transp": 0.1776541,
+  "ber_lloyd_ls": 0.1777272,
+  "ber_decim": 0.1528539,
+  "ber_baseline": 0.1528539,
+  "metodo": "decim decim m=15 (vecino)"
+ },
+ {
+  "fuente": "markov",
+  "latente_bits": 70,
+  "ber_unif_transp": 0.1068706,
+  "ber_unif_ls": 0.1068671,
+  "ber_lloyd_transp": 0.1064729,
+  "ber_lloyd_ls": 0.1064695,
+  "ber_decim": 0.0915266,
+  "ber_baseline": 0.0915266,
+  "metodo": "decim decim m=8 (vecino)"
+ },
+ {
+  "fuente": "markov",
+  "latente_bits": 125,
+  "ber_unif_transp": 0.0629487,
+  "ber_unif_ls": 0.0629188,
+  "ber_lloyd_transp": 0.0625496,
+  "ber_lloyd_ls": 0.0625904,
+  "ber_decim": 0.0490302,
+  "ber_baseline": 0.0490302,
+  "metodo": "decim decim m=4 (vecino)"
+ },
+ {
+  "fuente": "markov",
+  "latente_bits": 250,
+  "ber_unif_transp": 0.0311008,
+  "ber_unif_ls": 0.0310634,
+  "ber_lloyd_transp": 0.0307151,
+  "ber_lloyd_ls": 0.0307431,
+  "ber_decim": 0.0249975,
+  "ber_baseline": 0.0249975,
+  "metodo": "decim decim m=2 (hold)"
+ },
+ {
+  "fuente": "oversamp",
+  "latente_bits": 35,
+  "ber_unif_transp": 0.3201512,
+  "ber_unif_ls": 0.3201836,
+  "ber_lloyd_transp": 0.3200428,
+  "ber_lloyd_ls": 0.3200956,
+  "ber_decim": 0.3637796,
+  "ber_baseline": 0.3200428,
+  "metodo": "lloyd_transp d=35 b=1"
+ },
+ {
+  "fuente": "oversamp",
+  "latente_bits": 70,
+  "ber_unif_transp": 0.2277188,
+  "ber_unif_ls": 0.2279088,
+  "ber_lloyd_transp": 0.2277092,
+  "ber_lloyd_ls": 0.2279236,
+  "ber_decim": 0.247917,
+  "ber_baseline": 0.2277092,
+  "metodo": "lloyd_transp d=70 b=1"
+ },
+ {
+  "fuente": "oversamp",
+  "latente_bits": 125,
+  "ber_unif_transp": 0.0924272,
+  "ber_unif_ls": 0.092448,
+  "ber_lloyd_transp": 0.0923924,
+  "ber_lloyd_ls": 0.0924952,
+  "ber_decim": 0.0,
+  "ber_baseline": 0.0,
+  "metodo": "decim decim m=4 (hold)"
+ },
+ {
+  "fuente": "oversamp",
+  "latente_bits": 250,
+  "ber_unif_transp": 0.0031012,
+  "ber_unif_ls": 0.0031232,
+  "ber_lloyd_transp": 0.0029504,
+  "ber_lloyd_ls": 0.0029652,
+  "ber_decim": 0.0,
+  "ber_baseline": 0.0,
+  "metodo": "decim decim m=2 (hold)"
+ },
+ {
+  "fuente": "random",
+  "latente_bits": 35,
+  "ber_unif_transp": 0.4143263,
+  "ber_unif_ls": 0.4145059,
+  "ber_lloyd_transp": 0.4143525,
+  "ber_lloyd_ls": 0.4145114,
+  "ber_decim": NaN,
+  "ber_baseline": 0.4143263,
+  "metodo": "unif_transp d=35 b=1"
+ },
+ {
+  "fuente": "random",
+  "latente_bits": 70,
+  "ber_unif_transp": 0.3770782,
+  "ber_unif_ls": 0.3772076,
+  "ber_lloyd_transp": 0.3770262,
+  "ber_lloyd_ls": 0.3771994,
+  "ber_decim": NaN,
+  "ber_baseline": 0.3770262,
+  "metodo": "lloyd_transp d=70 b=1"
+ },
+ {
+  "fuente": "random",
+  "latente_bits": 125,
+  "ber_unif_transp": 0.3317449,
+  "ber_unif_ls": 0.331959,
+  "ber_lloyd_transp": 0.3317442,
+  "ber_lloyd_ls": 0.3319607,
+  "ber_decim": NaN,
+  "ber_baseline": 0.3317442,
+  "metodo": "lloyd_transp d=125 b=1"
+ },
+ {
+  "fuente": "random",
+  "latente_bits": 250,
+  "ber_unif_transp": 0.2471353,
+  "ber_unif_ls": 0.2475115,
+  "ber_lloyd_transp": 0.2470666,
+  "ber_lloyd_ls": 0.2474775,
+  "ber_decim": NaN,
+  "ber_baseline": 0.2470666,
+  "metodo": "lloyd_transp d=250 b=1"
+ }
+]

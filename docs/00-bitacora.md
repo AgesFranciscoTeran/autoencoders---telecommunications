@@ -244,6 +244,10 @@ Si hubiera que resumir el proyecto en una frase por etapa:
     Una cascada de compresores no es Hinton 2006.
 16. A siete diezmilésimas del umbral no se cierra: se mide. Y se dice qué
     métrica cruzó y cuál no.
+17. Un baseline que mejora al empeorar sus datos no es un baseline. Hay que
+    atacarlo tan en serio como al método propio.
+18. Una métrica que mide el mecanismo vale más que una que mide el resultado:
+    `ber_tapados` distinguió «no ayuda» de «no aprende».
 
 ---
 
@@ -398,7 +402,7 @@ limitaciones si esto llega a paper.
 
 **Formato:** fecha · qué se ejecutó · qué salió · qué se decidió.
 
-### Primeros intentos
+### 2026-08-23
 
 - **Ejecutado:** `verificar_robustez.py --seeds 10` sobre los baselines clásicos.
 - **Resultado:** la diferencia PCA entre `code` y `random` queda dentro de
@@ -406,7 +410,7 @@ limitaciones si esto llega a paper.
 - **Decidido:** el hallazgo pasa de observación a resultado con barras de error.
   Se adopta procedencia automática en `data/procedencia.json`.
 
-### Calibración del arnés
+### 2026-08-25 · Calibración del arnés
 
 - **Ejecutado:** cuatro rondas de diagnóstico sobre `oversamp` L=250, donde la
   respuesta correcta es BER ≈ 0 porque al autoencoder le sobra el doble de bits.
@@ -426,12 +430,14 @@ limitaciones si esto llega a paper.
 - **Decidido:** relanzar el barrido con esa configuración. Añadido control de
   monotonía al verificador (más bits siempre debe dar menos BER).
 
-### Barrido con cinco semillas
+### 2026-08-25 · Barrido con cinco semillas
 
 - **Calibración in situ aprobada:** `oversamp direct` L=125 da 3.2 × 10⁻⁷.
 - **Reproducibilidad mucho mayor de lo previsto:** mediana de |Δ| entre semillas
   de 0.0005 en `direct` y 0.0007 en `nested`.
 - **Seis configuraciones ganan en 4/4 semillas**, con márgenes de 4σ a 216σ.
+  *(Cifra superada: al fortalecer la vara con Lloyd-Max, dos de esas victorias
+  cayeron y los márgenes se recalcularon. Ver la entrada de septiembre.)*
 - **Corrección metodológica:** en un análisis previo elegí el mejor modo por
   semilla antes de promediar, lo cual es selección posterior. Al fijar el modo,
   `markov nested L=70` pasa de aparente victoria a 0/4.
@@ -439,7 +445,7 @@ limitaciones si esto llega a paper.
   L=250 (0.185 en vez de ~2 × 10⁻⁶). El mejor checkpoint por validación pasa a
   ser obligatorio.
 
-### Entropía del latente
+### 2026-08-25 · Entropía del latente
 
 - **Primer estimador refutado por cota de cordura.** La corrección de segundo
   orden `H ≈ H_marg − Σ I(i;j)` dio 0.0 bits para un latente que reconstruye una
@@ -454,7 +460,7 @@ limitaciones si esto llega a paper.
 - **Consecuencia:** a tasas bajas, donde el autoencoder gana, el latente es casi
   incompresible. La codificación entrópica no regrafica el mapa de viabilidad.
 
-### Cierre: tres experimentos finales
+### 2026-08-25 · Cierre: tres experimentos finales
 
 Los tres refutaron afirmaciones previas. Es lo que se esperaba de ellos.
 
@@ -482,7 +488,7 @@ Los tres refutaron afirmaciones previas. Es lo que se esperaba de ellos.
   desde 400k. El 14.5 % que atribuí a "más datos" venía de **más pasos**: con
   épocas fijas, duplicar los datos duplicaba las actualizaciones.
 
-### Preentrenamiento fiel y el confundido de arquitectura
+### 2026-09-09 · Preentrenamiento fiel y el confundido de arquitectura
 
 Dos experimentos, dos predicciones refutadas, una conclusión publicada revisada.
 
@@ -510,7 +516,7 @@ Dos experimentos, dos predicciones refutadas, una conclusión publicada revisada
   protocolo. Con preentrenamiento es robusta.
 - **`markov` L=250 con RBM: BER 0.0107.** A siete diezmilésimas del umbral FEC.
 
-### La última pregunta: ¿cruza el umbral?
+### 2026-09-09 · La última pregunta: ¿cruza el umbral?
 
 - **`umbral.py`** sobre `markov` L=250, escalera + RBM, 4 semillas, dos tasas de
   ajuste fino. Con BER total: **0.0107, no cruza** en ninguna semilla. Con salida
@@ -522,6 +528,48 @@ Dos experimentos, dos predicciones refutadas, una conclusión publicada revisada
   La degradación temprana era de L=35; en L=250 el ajuste mejora hasta el final.
 - **Proyecto cerrado.** Las preguntas abiertas están en `07-hacia-paper.md`,
   justificadas y priorizadas.
+
+### 2026-09-14 · Denoising, y la retractación de la victoria estrella
+
+**Denoising (Vincent et al.).** P1 refutada: sobre `code` el enmascarado no
+mueve el BER (0.2477 con p=0, 0.2481 con p=0.50). Lo decisivo es la métrica
+nueva `ber_tapados`, que mide si el modelo infiere los bits ocultos:
+
+| fuente | ber_tapados | |
+|---|---|---|
+| `code` | 0.5001 | azar: no infiere nada |
+| `random` | 0.5000 | correcto, es imposible |
+| `lowdim` L=250 | 0.1129 | infiere con fuerza |
+| `markov` L=250 | 0.0762 | infiere con fuerza |
+
+El denoising **sí** abre el camino de gradiente — pero no sobre estructura
+algebraica. Tercera evidencia independiente de la ceguera, con una medición
+distinta al BER y a PCA. Y `code` y `random` coinciden hasta la quinta cifra.
+
+Sorpresa: `lowdim` L=250 con p=0.10 da 0.0346, mejor que el preentrenamiento
+RBM (0.0369). P3 y P4 refutadas parcialmente; la curva en p no es monótona.
+La recalibración de BatchNorm resultó irrelevante (|Δ| máx 0.00095), lo que
+cierra esa duda en lugar de arrastrarla.
+
+**Retractación: la vara de PCA estaba débil.** Al cruzar el CSV con la página
+de resultados aparecieron dos valores para `lowdim` L=70 (0.1776 y 0.1861). La
+causa: el cuantizador usaba el rango min/max de las proyecciones de
+entrenamiento, y ese rango **crece con n**. La vara empeoraba cuantos más datos
+se le daban — 0.1772 con 20 000 muestras, 0.1866 con 400 000.
+
+Recalculada con Lloyd-Max (óptimo en MSE por componente): **0.0977**. Y probada
+además con síntesis por mínimos cuadrados en lugar de transponer la base, que
+no mejora en ninguna de las 16 celdas —con PCA la base es ortonormal, la
+transpuesta ya era óptima—, de modo que dos rondas independientes convergen.
+
+Consecuencia: **caen dos victorias**, `lowdim` L=70 (la de 216 σ) y `lowdim`
+L=125. Quedan 6 de 8. El patrón resultante es más nítido y tiene explicación:
+`lowdim` es casi lineal y por tanto terreno de PCA; `markov` tiene correlación
+local que PCA no captura. El mejor punto del proyecto pasa a ser `markov` L=250
+con RBM, que además es el único que roza el umbral operativo.
+
+El baseline lo construí yo con min/max, y reporté los 216 σ sin cuestionarlo.
+El error estuvo desde el principio del proyecto.
 
 Ver [Hacia un paper](07-hacia-paper.md) para lo que queda abierto.
 

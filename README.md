@@ -7,7 +7,7 @@ Bitácora personal de trabajo: experimentos, decisiones, errores y correcciones.
 
 ## Empieza por aquí
 
-- **[Presentación](presentacion/index.html)** — resumen didáctico en 21 páginas ([PDF](presentacion/presentacion-autoencoders-bpsk.pdf))
+- **[Presentación](presentacion/index.html)** — 18 diapositivas para exponerlo en 20 minutos
 - **[Bitácora](docs/00-bitacora.md)** — el camino completo, etapa por etapa
 - **[Glosario](docs/06-glosario.md)** — todos los términos
 - **[Resultados](docs/03-resultados.md)** — qué está firme y qué no
@@ -35,8 +35,9 @@ solo puede juzgarse contra la cota de Shannon. Un BER suelto no significa nada.
 **Proyecto cerrado.** No son viables a tasas agresivas (18/20 puntos del barrido
 principal por encima del umbral FEC), pero sí en una franja estrecha con decisión
 blanda: `markov` L=250 con escalera y RBM llega a BER 0.0107 con el 90 % de los
-bits en 0.0011. Y superan a lo clásico en casi todo el mapa de `markov` y
-`lowdim` si la arquitectura se elige por tasa.
+bits en 0.0011. Con la vara recalculada con Lloyd-Max, superan a lo clásico en **todo el mapa de
+`markov`** y en los extremos de `lowdim`: 6 de 8 puntos. Dos victorias previas
+cayeron al fortalecer el baseline, incluida la que se había reportado a 216 σ.
 
 ## Reproducir sin GPU, en segundos
 
