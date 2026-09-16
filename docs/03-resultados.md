@@ -334,13 +334,22 @@ directamente si el modelo infiere los bits ocultos.
 
 | fuente | L | `ber_tapados` | |
 |---|---|---|---|
-| `code` | 250 | **0.5001 ± 0.0004** | prácticamente azar |
+| `code` | 125 | 0.5000 ± 0.0005 | prácticamente azar |
+| `code` | 250 | **0.5001 ± 0.0003** | prácticamente azar |
 | `random` | 250 | 0.5000 ± 0.0004 | correcto, es imposible |
-| `lowdim` | 250 | 0.1421 ± 0.0301 | infiere con fuerza |
-| `markov` | 250 | 0.0980 ± 0.0225 | infiere con fuerza |
+| `lowdim` | 70 | 0.1713 ± 0.0041 | infiere con fuerza |
+| `lowdim` | 250 | 0.1129 ± 0.0044 | infiere con más fuerza |
+| `markov` | 70 | 0.1197 ± 0.0014 | infiere con fuerza |
+| `markov` | 250 | 0.0762 ± 0.0056 | infiere con más fuerza |
 
-*(Las cuatro filas salen de la misma corrida de denoising, para que sean
-comparables entre sí.)*
+*(Todas las celdas salen de la misma corrida de denoising: media sobre las tres
+*p* > 0 y las cuatro semillas. La rejilla usa dos escalones por fuente, y no son
+los mismos en todas. La desviación es entre semillas; promediar los dos
+escalones en una sola cifra la inflaría hasta siete veces, porque casi toda la
+variación es entre escalones.)*
+
+El gradiente por escalones dice algo por sí solo: en `lowdim` y `markov`, más
+bits significan mejor inferencia de lo tapado. En `code` la cifra no se mueve.
 
 **El mecanismo funciona; sobre estructura algebraica, apenas.** En `lowdim` y
 `markov` el modelo aprende a rellenar lo que se le tapa. En `code` se queda al
@@ -551,6 +560,12 @@ Sobre **10 semillas**, media ± desviación estándar:
 Dentro de 1σ en los cuatro escalones. Datos en
 [`data/pca_code_vs_random.csv`](../data/pca_code_vs_random.csv), procedencia en
 [`data/procedencia.json`](../data/procedencia.json).
+
+**Medido con el cuantizador antiguo.** Esta tabla se calculó con la
+cuantización uniforme min/max, antes del recálculo con Lloyd-Max, y no se
+rehízo. La conclusión no debería cambiar, porque es una comparación entre
+`code` y `random` con el mismo cuantizador en los dos lados: el sesgo se
+cancela. Queda como pendiente barato, no como duda abierta.
 
 ![Zona de viabilidad por fuente](../figs/zona_viabilidad.png)
 

@@ -19,9 +19,10 @@ hecho.
 | Diagnóstico de paridad nunca ejecutado | **cerrada** | ejecutado, y **refutó** la hipótesis que iba a sostener |
 | Una sola semilla | **cerrada** | 4 semillas completas |
 | Vara de PCA débil | **cerrada** | el cuantizador min/max dependía del tamaño de muestra; recalculada con Lloyd-Max. Dos victorias cayeron |
-| Denoising como objetivo auxiliar | **cerrada** | probado en factorial 2×3 con 312 celdas: no abre el camino en `code` y no se compone con el preentrenamiento |
+| Denoising como objetivo auxiliar | **parcial** | probado en factorial 2×3 con 312 celdas: el enmascarado no abre el camino en `code` y no se compone con el preentrenamiento. Falta `flip`, ver extensión 12 |
 | Solo encoders MLP | **cerrada** | convolución 1D probada, con la localidad como variable y control en las dos direcciones |
 | `lowdim L=70` sin saturar en datos | **cerrada** | con pasos fijos, saturado desde 400k |
+| La vara vigente no se podía regenerar | **cerrada** | `vara_definitiva.py` calcula y `consolidar_varas.py` formatea; `generar_tablas.py` ya no pisa el archivo |
 
 El diagnóstico de paridad merece una nota. Se construyó para **demostrar** que el
 descenso de gradiente no aprende XOR de grado alto, y demostró lo contrario:
@@ -66,7 +67,10 @@ ayuda» de «no aprende». Sobre `lowdim` y `markov` da 0.07–0.11; sobre `code
 0.4946 con cualquier inicialización. El enmascarado sí abre el camino de
 gradiente, pero no hacia estructura algebraica.
 
-*Sustento:* completo, 312 celdas, 4 semillas, con hipótesis primaria registrada.
+*Sustento:* 312 celdas, 4 semillas, con hipótesis primaria registrada. Con dos
+reservas declaradas en [Resultados](03-resultados.md): sobre `code` la escalera
+estrecha se queda en 0.2477, por debajo del 0.1982 del barrido v4, y solo se
+ejecutó el modo `mask`.
 
 ### 3. Correspondencia arquitectura–estructura
 
@@ -131,6 +135,7 @@ Ninguno de estos invalida lo hecho. Son extensiones.
 | 10 | Simulación post-FEC con LDPC real | Convierte la estructura de confianza favorable en una cifra de BER operativo |
 | 12 | Correr `flip` sobre `code`, y añadir `oversamp` a la rejilla | `flip` es la corrupción adecuada para un código de bloque; con `oversamp` la tabla de `ber_tapados` queda como una escalera de cinco puntos ordenada por entropía |
 | 13 | Repetir el factorial sobre `code` con el MLP ancho | La escalera estrecha rinde 0.2477 ahí, por debajo del 0.1982 del barrido v4 |
+| 14 | Regenerar la columna `vara` de `data/denoising/denoising_resumen.csv` y el diccionario `VARAS` de `rbm_stack.py` | Ambos conservan los valores previos al recálculo: contra ellos `lowdim` L=70 parece victoria y es derrota |
 | 11 | Cuantizador que minimice BER en vez de MSE | Lloyd-Max es óptimo en MSE de la proyección, no en la métrica del proyecto. Podría fortalecer la vara aún más, aunque la evidencia sugiere retornos decrecientes |
 | 6 | VQ-VAE | La variante de VAE que aplica: latentes discretos y codebook como modelo de entropía. Un VAE gaussiano iría en contra: el término KL acota superiormente `I(x;z)` y reduciría la información justo cuando se quiere maximizarla |
 

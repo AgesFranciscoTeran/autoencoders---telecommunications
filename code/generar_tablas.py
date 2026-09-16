@@ -4,9 +4,27 @@
 NIVEL 1 DE REPRODUCCION -- sin GPU, sin PyTorch, corre en segundos.
 
 Regenera las tablas verificadas del proyecto:
-  data/cotas_teoricas.csv      cota de Shannon (SLB) por fuente y escalon
-  data/baselines_clasicos.csv  mejor metodo clasico por fuente y escalon
-  data/pca_vs_random.csv       evidencia de que PCA es ciego al codigo de bloque
+  data/cotas_teoricas.csv             cota de Shannon (SLB) por fuente y escalon
+  data/baselines_minmax_historico.csv baselines con el cuantizador ANTIGUO
+  data/pca_vs_random.csv              PCA es ciego al codigo de bloque
+
+AVISO SOBRE LA VARA
+-------------------
+Este script cuantiza con un rango uniforme min/max, y ESA VARA ESTA RETRACTADA:
+el rango crece con el numero de muestras, asi que el baseline empeoraba cuantos
+mas datos se le daban. Inflo los margenes y produjo dos victorias que luego
+cayeron (`lowdim` L=70, la de 216 sigma, y `lowdim` L=125).
+
+Por eso escribe `baselines_minmax_historico.csv` y NO `baselines_clasicos.csv`.
+La vara vigente se regenera con:
+
+    python3 code/vara_definitiva.py     # calcula  -> data/varas_definitivas.json
+    python3 code/consolidar_varas.py    # formatea -> data/baselines_clasicos.csv
+
+Lo que este script sigue produciendo es valido y util: las cotas de Shannon, y
+la evidencia de que PCA es ciego al codigo. Ese segundo hallazgo no depende del
+cuantizador, porque se aplica el mismo a `code` y a `random` y el sesgo se
+cancela en la diferencia.
 
 Uso:  python3 code/generar_tablas.py
 """
@@ -182,7 +200,7 @@ def main():
                                  ber_baseline=round(best[L][0], 4), metodo=best[L][1]))
 
     for nombre, filas in (("cotas_teoricas", filas_cotas),
-                          ("baselines_clasicos", filas_bl),
+                          ("baselines_minmax_historico", filas_bl),
                           ("pca_vs_random", filas_pca)):
         df = pd.DataFrame(filas)
         p = os.path.join(OUT, nombre + ".csv")
@@ -195,6 +213,11 @@ def main():
     for L in LADDER:
         c, r = pca[("code", L)], pca[("random", L)]
         print(f"  {L:5d} {c:8.4f} {r:8.4f} {c-r:+8.4f}")
+
+    print("\nNOTA: los baselines de este script usan el cuantizador min/max, que")
+    print("      esta RETRACTADO, y por eso van a 'baselines_minmax_historico.csv'.")
+    print("      La vara vigente:  python3 code/vara_definitiva.py")
+    print("                        python3 code/consolidar_varas.py")
 
 
 if __name__ == "__main__":

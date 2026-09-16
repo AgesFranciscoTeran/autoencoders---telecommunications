@@ -18,8 +18,8 @@ todo desde cero.
 
 Si vengo a retomar esto después de un tiempo:
 
-0. **[Presentación](presentacion/index.html)** — 18 diapositivas para exponer el
-   proyecto en 20 minutos. Flechas para avanzar, `F` para pantalla completa.
+0. **[Presentación](presentacion/index.html)** — 21 páginas en PDF, pensadas
+   para exponer el proyecto a alguien que llega sin contexto.
 1. **[Bitácora](docs/00-bitacora.md)** — el camino completo, etapa por etapa:
    qué creíamos, qué lo rompió, qué cambiamos. Es la página que reconstruye todo
    el razonamiento.
@@ -52,16 +52,15 @@ Referencia: [Teoría](docs/01-teoria.md) ·
 | Denoising sobre `code` | Firme — **no** abre el camino de gradiente |
 | Denoising como objetivo auxiliar | Firme para enmascarado; `flip` sin probar |
 
-**Proyecto cerrado.** La respuesta corta: los autoencoders **no** son viables
-para comprimir flujos de bits BPSK a tasas agresivas — 18 de 20 puntos del
-barrido principal quedan por encima del umbral corregible por FEC — pero **sí
-son viables en una franja estrecha con decisión blanda**: `markov` L=250 con
-escalera y RBM llega a BER 0.0107 con el 90 % de los bits en 0.0011. Pero **sí** superan a los métodos clásicos
-a tasas agresivas (R ≤ 0.14) sobre estructura geométrica o correlacional, con
-seis de ocho puntos con la vara recalculada (dos cayeron al fortalecerla).
-Sobre redundancia algebraica fracasan, y el diagnóstico
-mostró que el obstáculo no es la capacidad del modelo sino el objetivo de
-reconstrucción.
+**Proyecto cerrado.** La respuesta corta: los autoencoders **no** alcanzan
+calidad de enlace con BER total — 18 de 20 puntos del barrido principal quedan
+por encima del umbral corregible por FEC — pero **sí son viables en una franja
+estrecha con decisión blanda**: `markov` L=250 con escalera y RBM llega a BER
+0.0107, con el 90 % de los bits en 0.0011. Y **sí** superan a los métodos
+clásicos en seis de ocho puntos con la vara recalculada: a las cuatro tasas
+sobre estructura correlacional, y solo en los extremos sobre la geométrica.
+Sobre redundancia algebraica fracasan, y el diagnóstico mostró que el obstáculo
+no es la capacidad del modelo sino el objetivo de reconstrucción.
 
 **Dos revisiones posteriores.** La vara clásica de PCA estaba débil: su
 cuantizador dependía del tamaño de muestra, y al recalcularla con Lloyd-Max

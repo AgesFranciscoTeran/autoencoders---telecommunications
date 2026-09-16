@@ -7,7 +7,7 @@ Bitácora personal de trabajo: experimentos, decisiones, errores y correcciones.
 
 ## Empieza por aquí
 
-- **[Presentación](presentacion/index.html)** — 18 diapositivas para exponerlo en 20 minutos
+- **[Presentación](presentacion/index.html)** — 21 páginas en PDF, para exponerlo sin contexto previo
 - **[Bitácora](docs/00-bitacora.md)** — el camino completo, etapa por etapa
 - **[Glosario](docs/06-glosario.md)** — todos los términos
 - **[Resultados](docs/03-resultados.md)** — qué está firme y qué no
@@ -25,12 +25,18 @@ solo puede juzgarse contra la cota de Shannon. Un BER suelto no significa nada.
 
 | Componente | Estado |
 |---|---|
-| Cotas teóricas | Firme |
+| Cotas teóricas (Shannon) | Firme |
 | Baselines clásicos | Firme |
-| PCA ciego a redundancia algebraica | Firme |
-| Barrido de autoencoders | Firme (4 semillas) |
-| Encoder convolucional | Firme |
-| Diagnóstico de paridad | Ejecutado (refutó la hipótesis inicial) |
+| PCA es ciego a la redundancia algebraica | Firme (con el cuantizador antiguo; no rehécho) |
+| Barrido de autoencoders | Firme (4 semillas, calibración aprobada) |
+| Escalera anidada | Firme (costo mediano +0.0011 BER) |
+| Encoder convolucional | Firme (2 escalones, 1 semilla) |
+| Diagnóstico de paridad | Ejecutado — **refutó** la hipótesis inicial |
+| Preentrenamiento por capas (fiel) | Firme — **ayuda**, contra la predicción |
+| Interacción arquitectura–tasa | Firme (4 semillas, protocolo idéntico) |
+| Vara clásica (Lloyd-Max) | Firme — reforzada en dos rondas |
+| Denoising sobre `code` | Firme — **no** abre el camino de gradiente |
+| Denoising como objetivo auxiliar | Firme para enmascarado; `flip` sin probar |
 
 **Proyecto cerrado.** No son viables a tasas agresivas (18/20 puntos del barrido
 principal por encima del umbral FEC), pero sí en una franja estrecha con decisión
@@ -43,10 +49,13 @@ cayeron al fortalecer el baseline, incluida la que se había reportado a 216 σ.
 
 ```bash
 pip install -r requirements.txt
-python3 code/generar_tablas.py
+
+python3 code/generar_tablas.py     # cotas + baselines históricos
+python3 code/vara_definitiva.py    # la vara vigente (Lloyd-Max)
+python3 code/consolidar_varas.py   # -> data/baselines_clasicos.csv
 ```
 
-Debe imprimir:
+`generar_tablas.py` debe imprimir, con el cuantizador min/max que conserva:
 
 ```
 PCA sobre 'code' vs 'random' (si son iguales, PCA es ciego al codigo):
@@ -56,6 +65,12 @@ PCA sobre 'code' vs 'random' (si son iguales, PCA es ciego al codigo):
     125   0.3350   0.3354  -0.0004
     250   0.2529   0.2536  -0.0007
 ```
+
+Ese hallazgo —que PCA es ciego al código— no depende del cuantizador, porque se
+aplica el mismo a los dos lados de la comparación. La **vara** sí depende: la
+vigente es la de Lloyd-Max, y sale de los otros dos scripts. Por eso
+`generar_tablas.py` escribe `baselines_minmax_historico.csv` y ya no pisa
+`baselines_clasicos.csv`.
 
 ## Licencia
 

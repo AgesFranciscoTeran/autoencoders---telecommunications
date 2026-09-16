@@ -1,17 +1,21 @@
 fuente,latente_bits,tasa,compresion,ber_baseline,metodo,ber_minmax_historico,ber_lloyd,ber_lloyd_ls
-lowdim,35,0.07,14.29,0.1932,lloyd_transp d=35 b=1,0.1932,0.1932,0.1933
-lowdim,70,0.14,7.14,0.0977,lloyd_transp d=35 b=2,0.0985,0.0977,0.0977
-lowdim,125,0.25,4.0,0.0513,lloyd_transp d=31 b=4,0.0525,0.0513,0.0513
-lowdim,250,0.5,2.0,0.0403,lloyd_transp d=62 b=4,0.0413,0.0403,0.0403
-markov,35,0.07,14.29,0.1529,decim decim m=15 (vecino),0.1778,0.1777,0.1777
-markov,70,0.14,7.14,0.0915,decim decim m=8 (vecino),0.1069,0.1065,0.1065
-markov,125,0.25,4.0,0.049,decim decim m=4 (vecino),0.0629,0.0625,0.0626
-markov,250,0.5,2.0,0.025,decim decim m=2 (hold),0.0311,0.0307,0.0307
-oversamp,35,0.07,14.29,0.32,lloyd_transp d=35 b=1,0.3202,0.32,0.3201
-oversamp,70,0.14,7.14,0.2277,lloyd_transp d=70 b=1,0.2277,0.2277,0.2279
-oversamp,125,0.25,4.0,0.0,decim decim m=4 (hold),0.0924,0.0924,0.0925
-oversamp,250,0.5,2.0,0.0,decim decim m=2 (hold),0.0031,0.003,0.003
 random,35,0.07,14.29,0.4143,unif_transp d=35 b=1,0.4143,0.4144,0.4145
 random,70,0.14,7.14,0.377,lloyd_transp d=70 b=1,0.3771,0.377,0.3772
 random,125,0.25,4.0,0.3317,lloyd_transp d=125 b=1,0.3317,0.3317,0.332
 random,250,0.5,2.0,0.2471,lloyd_transp d=250 b=1,0.2471,0.2471,0.2475
+oversamp,35,0.07,14.29,0.32,lloyd_transp d=35 b=1,0.3202,0.32,0.3201
+oversamp,70,0.14,7.14,0.2277,lloyd_transp d=70 b=1,0.2277,0.2277,0.2279
+oversamp,125,0.25,4.0,0.0,decim decim m=4 (hold),0.0924,0.0924,0.0925
+oversamp,250,0.5,2.0,0.0,decim decim m=2 (hold),0.0031,0.003,0.003
+markov,35,0.07,14.29,0.1529,decim decim m=15 (vecino),0.1778,0.1777,0.1777
+markov,70,0.14,7.14,0.0915,decim decim m=8 (vecino),0.1069,0.1065,0.1065
+markov,125,0.25,4.0,0.049,decim decim m=4 (vecino),0.0629,0.0625,0.0626
+markov,250,0.5,2.0,0.025,decim decim m=2 (hold),0.0311,0.0307,0.0307
+lowdim,35,0.07,14.29,0.1932,lloyd_transp d=35 b=1,0.1932,0.1932,0.1933
+lowdim,70,0.14,7.14,0.0977,lloyd_transp d=35 b=2,0.0985,0.0977,0.0977
+lowdim,125,0.25,4.0,0.0513,lloyd_transp d=31 b=4,0.0525,0.0513,0.0513
+lowdim,250,0.5,2.0,0.0403,lloyd_transp d=62 b=4,0.0413,0.0403,0.0403
+code,35,0.07,14.29,0.4143,lloyd_transp d=35 b=1,0.4144,0.4143,0.4145
+code,70,0.14,7.14,0.3772,unif_transp d=70 b=1,0.3772,0.3772,0.3774
+code,125,0.25,4.0,0.3317,lloyd_transp d=125 b=1,0.3317,0.3317,0.3319
+code,250,0.5,2.0,0.0,oraculo oraculo 250/250,0.2471,0.2471,0.2475

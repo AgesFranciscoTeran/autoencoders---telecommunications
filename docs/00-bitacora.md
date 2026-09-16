@@ -256,6 +256,9 @@ Si hubiera que resumir el proyecto en una frase por etapa:
     sobrevivir a tres líneas de pandas sobre tus propios datos.
 22. «No infiere nada» y «infiere el 2 %» se escriben parecido y se refutan muy
     distinto. Mide antes de escribir el absoluto.
+23. Una retractación no termina en la prosa. Termina cuando el valor viejo ya no
+    puede volver: ni desde el script que lo regenera, ni desde la constante que
+    lo codifica, ni desde la columna que lo guarda.
 
 ---
 
@@ -652,6 +655,57 @@ Una revisión contra los CSV publicados encontró siete problemas. Todos ciertos
 Todos aplicados. La lección: publicar los CSV hace el trabajo verificable, y
 eso corta en las dos direcciones. Cuatro de los siete se encuentran abriendo el
 CSV con pandas.
+
+### 2026-09-15 · Segunda ronda de revisión: la vara se reintroduce sola
+
+La primera ronda dejó el texto en orden. La segunda miró el código y los datos
+que el texto cita, y encontró cinco cosas más. Dos importan.
+
+- **Una fuente entera desaparecida.** El CSV de varas vigente tiene 16 filas,
+  no 20: al sustituirlo por el de Lloyd-Max se perdieron las cuatro de `code`,
+  porque `vara_definitiva.py` nunca la incluía en su bucle. Nadie lo notó
+  porque el consumidor que la necesitaba ya había corrido.
+- **El comando de reproducción documentado revierte la corrección central.**
+  `generar_tablas.py` sigue con el cuantizador min/max y escribe
+  `data/baselines_clasicos.csv`, que hoy tiene la vara de Lloyd-Max. Ejecutar el
+  nivel 1 tal y como lo pide la página de reproducción devuelve las dos
+  victorias retractadas, en silencio, y arrastra a `generar_figuras.py` y a la
+  presentación, que leen ese mismo archivo. Se detecta porque el CSV vigente
+  tiene tres columnas (`ber_minmax_historico`, `ber_lloyd`, `ber_lloyd_ls`) que
+  ese script no escribe: prueba de que lo generó otro.
+- **El CSV de varas no tiene generador en el repositorio.** Sale de
+  `varas_definitivas.json`, que sí produce `vara_definitiva.py`, pero el paso
+  intermedio nunca se commiteó. Es un artefacto que hay que conservar, no uno
+  que se pueda regenerar.
+- **La columna `vara` de `denoising_resumen.csv` es la retractada** (`lowdim`
+  L=70: 0.1776 frente a 0.0977). Contra ella, el mejor punto del denoising en
+  esa celda parece victoria y es derrota. La victoria de 216 σ, viva dentro de
+  un dato publicado tres semanas después de retractarla.
+- **`VARAS` en `rbm_stack.py`** conserva 0.1861 y 0.1954. `denoising.py` los
+  sobrescribe leyendo el CSV; `rbm_stack.py` a solas, no. Con esto van **tres**
+  valores para la misma celda en tres sitios: 0.1776, 0.1861 y 0.0977.
+- **La página de reproducción cubría el estado de hace tres semanas.** Faltaban
+  ocho scripts, entre ellos los de la vara vigente, el preentrenamiento RBM, el
+  denoising y el factorial.
+
+**Aplicado.** `generar_tablas.py` escribe ahora `baselines_minmax_historico.csv`
+y ya no toca la vara vigente; su docstring dice por qué y adónde ir. La
+derivación JSON → CSV existe como `consolidar_varas.py`, con un modo
+`--verificar` que falla si el CSV en disco no es exactamente lo que el JSON
+implica, y con una comprobación de cobertura que habría cazado la desaparición
+de `code`. `vara_definitiva.py` incluye esa fuente, con el oráculo de paridad
+como candidato, y escribe en `data/` en vez de en el directorio actual.
+
+Queda pendiente la columna `vara` de `denoising_resumen.csv` y el `VARAS` de
+`rbm_stack.py`: extensión 14 de [Hacia un paper](07-hacia-paper.md).
+
+**La lección, que es nueva.** Corregir el número en la prosa no corrige el
+proyecto. Un valor retractado sobrevive en tres sitios que el texto no toca: el
+script que lo regenera, la constante que lo codifica y la columna que lo
+guarda. Mientras el script del nivel 1 siguiera como estaba, cada ejecución
+limpia del repositorio deshacía la corrección más cara del proyecto. Una
+retractación no termina hasta que el valor viejo no puede volver por sí solo, y
+eso se consigue con un verificador, no con un párrafo.
 
 Ver [Hacia un paper](07-hacia-paper.md) para lo que queda abierto.
 

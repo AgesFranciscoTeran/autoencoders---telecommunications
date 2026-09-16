@@ -31,7 +31,7 @@ uniforme usa VALIDACION; el BER se mide siempre en TEST.
 
 Uso:  python3 vara_definitiva.py
 """
-import gc, json
+import gc, json, os
 import numpy as np
 
 DIM, K, P_MK, M_OS = 500, 32, 0.05, 4
@@ -44,7 +44,12 @@ def ber(rec, x):
     return float((np.sign(rec) != np.sign(x)).mean())
 
 
-def hacer(nombre, n, rng, W=None):
+def hacer(nombre, n, rng, W=None, P=None):
+    if nombre == "code":
+        k = DIM // 2
+        u = rng.integers(0, 2, (n, k)).astype(np.int8)
+        par = (u.astype(np.int32) @ P) % 2
+        return 2.0 * np.concatenate([u, par.astype(np.int8)], 1).astype(np.float32) - 1.0
     if nombre == "lowdim":
         z = rng.standard_normal((n, K)).astype(np.float32)
         x = np.sign(z @ W.T); x[x == 0] = 1
@@ -176,6 +181,17 @@ def decim_best(X, L):
     return best
 
 
+def oraculo_code(X, P, n_send):
+    """Transmite n_send bits sistematicos y RECALCULA las paridades.
+       Es el unico baseline que ve la estructura algebraica; con n_send = k
+       da BER 0 usando la mitad de los bits."""
+    k = DIM // 2
+    b = ((X + 1) / 2).astype(np.int32)
+    u = np.zeros((X.shape[0], k), np.int32)
+    u[:, :n_send] = b[:, :n_send]
+    return ber(2.0 * np.concatenate([u, (u @ P) % 2], 1) - 1.0, X)
+
+
 AE = {("lowdim", 35): 0.1870, ("lowdim", 70): 0.1051,
       ("lowdim", 125): 0.0607, ("lowdim", 250): 0.0346,
       ("markov", 35): 0.1498, ("markov", 70): 0.0902,
@@ -192,24 +208,35 @@ def main():
     print(f"n_train={N_TR}  n_val={N_VA}  n_test={N_TE}  (todo se ajusta en train/val)")
     print("=" * 100)
     print(f"{'fuente':9s}{'L':>5s}{'unif+Vt':>9s}{'unif+LS':>9s}{'Lloyd+Vt':>10s}"
-          f"{'Lloyd+LS':>10s}{'decim':>9s}{'MEJOR':>9s}  ganador")
+          f"{'Lloyd+LS':>10s}{'decim':>9s}{'oraculo':>9s}{'MEJOR':>9s}  ganador")
     filas, nuevas = [], {}
-    for nombre in ("lowdim", "markov", "oversamp", "random"):
+    for nombre in ("lowdim", "markov", "oversamp", "random", "code"):
         rng = np.random.default_rng(0)
         W = (rng.standard_normal((DIM, K)).astype(np.float32) / np.sqrt(K)
              if nombre == "lowdim" else None)
-        Xtr, Xva, Xte = (hacer(nombre, N_TR, rng, W), hacer(nombre, N_VA, rng, W),
-                         hacer(nombre, N_TE, rng, W))
+        P = None
+        if nombre == "code":                       # misma matriz en train y test
+            k = DIM // 2
+            P = np.zeros((k, k), np.int32)
+            for j in range(k):
+                P[rng.choice(k, 3, replace=False), j] = 1
+        Xtr, Xva, Xte = (hacer(nombre, N_TR, rng, W, P), hacer(nombre, N_VA, rng, W, P),
+                         hacer(nombre, N_TE, rng, W, P))
         for L in LADDER:
             cand = dict(varas(Xtr, Xva, Xte, L))
             cand["decim"] = (decim_best(Xte, L) if nombre in ("markov", "oversamp")
                              else (float("nan"), None))
+            if nombre == "code":
+                ns = min(DIM // 2, L)
+                cand["oraculo"] = (oraculo_code(Xte, P, ns), f"oraculo {ns}/{DIM//2}")
+            else:
+                cand["oraculo"] = (float("nan"), None)
             val = {k: v[0] for k, v in cand.items()}
             gan = min((k for k in val if not np.isnan(val[k])), key=lambda k: val[k])
             nuevas[(nombre, L)] = val[gan]
             print(f"{nombre:9s}{L:5d}{val['unif_transp']:9.4f}{val['unif_ls']:9.4f}"
                   f"{val['lloyd_transp']:10.4f}{val['lloyd_ls']:10.4f}{val['decim']:9.4f}"
-                  f"{val[gan]:9.4f}  {gan} {cand[gan][1] or ''}")
+                  f"{val['oraculo']:9.4f}{val[gan]:9.4f}  {gan} {cand[gan][1] or ''}")
             filas.append(dict(fuente=nombre, latente_bits=L,
                               **{f"ber_{k}": float(v) for k, v in val.items()},
                               ber_baseline=float(val[gan]),
@@ -230,8 +257,11 @@ def main():
     print(f"\n  victorias con Lloyd + transpuesta : {g1}/{len(AE)}")
     print(f"  victorias con la vara definitiva  : {g2}/{len(AE)}")
 
-    json.dump(filas, open("varas_definitivas.json", "w"), indent=1)
-    print("\n[guardado] varas_definitivas.json")
+    destino = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+                           "data", "varas_definitivas.json")
+    json.dump(filas, open(destino, "w"), indent=1)
+    print(f"\n[guardado] {destino}")
+    print("  siguiente paso:  python3 code/consolidar_varas.py")
 
 
 if __name__ == "__main__":

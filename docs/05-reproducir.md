@@ -5,10 +5,10 @@ title: Reproducir los experimentos
 
 # Reproducir los experimentos
 
-El proyecto está diseñado para reproducirse en **dos niveles independientes**.
-El nivel 1 no necesita GPU ni PyTorch y valida toda la parte teórica y los
-baselines clásicos; el nivel 2 necesita GPU y reproduce el barrido de
-autoencoders.
+El proyecto se reproduce en **tres niveles independientes**. El nivel 1 no
+necesita GPU ni PyTorch y valida la parte teórica y los baselines clásicos; el
+nivel 2 necesita GPU y reproduce el barrido principal de autoencoders; el nivel
+3 son los experimentos posteriores al barrido, cada uno con su propio script.
 
 ---
 
@@ -22,9 +22,22 @@ marcados como verificados.
 cd ruta/al/repositorio
 pip install -r requirements.txt
 
-python3 code/generar_tablas.py     # escribe data/*.csv
+python3 code/generar_tablas.py     # cotas + baselines históricos
+python3 code/vara_definitiva.py    # la vara vigente (Lloyd-Max)
+python3 code/consolidar_varas.py   # -> data/baselines_clasicos.csv
 python3 code/generar_figuras.py    # escribe figs/*.png
 ```
+
+**Tres scripts y no uno, a propósito.** `generar_tablas.py` usa el cuantizador
+uniforme min/max, que es la vara **retractada**: su rango crece con el número de
+muestras, así que el baseline empeoraba cuantos más datos se le daban. Escribía
+`baselines_clasicos.csv`, el mismo archivo que hoy guarda la vara buena, de modo
+que ejecutar el nivel 1 deshacía la corrección en silencio y arrastraba a las
+figuras y a la presentación, que leen de ahí.
+
+Ahora escribe `baselines_minmax_historico.csv` y no toca la vara vigente. Lo que
+sigue produciendo es válido: las cotas de Shannon y la evidencia de que PCA es
+ciego al código.
 
 Salida esperada al final de `generar_tablas.py`:
 
@@ -37,10 +50,41 @@ PCA sobre 'code' vs 'random' (si son iguales, PCA es ciego al codigo):
     250   0.2529   0.2536  -0.0007
 ```
 
-Si esos cuatro números se reproducen, el resultado central verificado del
-proyecto queda confirmado en tu máquina. Las semillas están fijadas
-(`SEED = 0`, `numpy.random.default_rng`), así que los valores deben coincidir
-dígito a dígito.
+Si esos cuatro números se reproducen, el hallazgo de que PCA es ciego al
+código queda confirmado en tu máquina. Las semillas están fijadas (`SEED = 0`,
+`numpy.random.default_rng`), así que los valores deben coincidir dígito a
+dígito. El hallazgo no depende del cuantizador, porque se aplica el mismo a
+`code` y a `random`; la **vara** sí depende, y esa se regenera aparte.
+
+### La vara vigente, en dos pasos
+
+Un script **calcula** y otro **formatea**. La separación es deliberada: el
+segundo no tiene ninguna decisión científica dentro, así que se puede releer en
+un minuto y no hay dos sitios donde el mismo número pueda divergir.
+
+```bash
+python3 code/vara_definitiva.py     # -> data/varas_definitivas.json
+python3 code/consolidar_varas.py    # -> data/baselines_clasicos.csv
+```
+
+`vara_definitiva.py` prueba, para cada fuente y escalón, cuantización uniforme
+frente a Lloyd-Max, síntesis por transpuesta frente a mínimos cuadrados,
+decimación donde aplica y el oráculo de paridad en `code`, y se queda con la
+mejor. Tarda varios minutos y no necesita GPU.
+
+`consolidar_varas.py` escribe una fila por (fuente, escalón) con la vara
+vigente y, al lado, las alternativas que perdieron —incluida la columna
+`ber_minmax_historico`, la retractada— para que el recálculo quede auditable
+desde el propio CSV. Comprueba además que no falte ninguna fuente: el CSV
+anterior había perdido las cuatro filas de `code` sin que nadie lo notara, y los
+consumidores se quedaban con la vara en blanco.
+
+```bash
+python3 code/consolidar_varas.py --verificar   # no escribe; compara CSV y JSON
+```
+
+Ese modo es el que conviene dejar en cualquier comprobación previa a publicar:
+falla si el CSV en disco no es exactamente lo que el JSON implica.
 
 ### Qué comprobar
 
@@ -99,6 +143,50 @@ python3 code/ae_telecom_v4.py --mode full    # barrido completo
 
 ---
 
+## Nivel 3 — experimentos posteriores al barrido
+
+Cada uno es autocontenido, se lanza desde la raíz del repositorio y necesita
+GPU. Todos escriben procedencia con fecha, semillas, versiones y hash de git.
+
+| script | qué responde | escribe | coste |
+|---|---|---|---|
+| `cierre.py --stage all` | paridad, convolución y saturación de datos | `./cierre/*.json` | horas |
+| `confundido.py` | separa «mejor checkpoint» de «arquitectura» | `./confundido/confundido.json` | ~1 h |
+| `rbm_stack.py` | preentrenamiento fiel a Hinton frente a escalera aleatoria | `./rbm_stack/rbm_stack.csv` | horas |
+| `umbral.py` | si `markov` L=250 cruza 10⁻² | `./umbral/umbral.json` | ~1 h |
+| `denoising.py` | si el enmascarado abre el camino de gradiente | `data/denoising/` | ~4 h |
+| `combinado.py` | factorial inicialización × ruido | `data/combinado/` | ~5 h |
+| `analizar_combinado.py` | rehace la estadística del factorial sin volver a entrenar | stdout | segundos |
+
+```bash
+python3 code/denoising.py --quick          # humo: 1 semilla, pasos cortos
+python3 code/denoising.py                  # rejilla completa, 4 semillas
+python3 code/combinado.py --solo-primaria  # solo markov L=250, ~15 min
+python3 code/combinado.py                  # factorial completo
+python3 code/combinado.py --quick          # humo, escribe en data/combinado_smoke/
+python3 code/analizar_combinado.py --parcial
+```
+
+`denoising.py` y `combinado.py` son **reanudables**: acumulan una línea por
+celda en un JSONL y al relanzar solo ejecutan lo que falta. El modo `--quick`
+escribe en un directorio aparte por construcción, para que una prueba de humo no
+pueda mezclarse con una corrida real. Separar el análisis de la ejecución
+(`analizar_combinado.py`) permite corregir el criterio estadístico sin repetir
+cinco horas de GPU.
+
+Dos avisos sobre los datos ya publicados de este nivel:
+
+- La columna `vara` de `data/denoising/denoising_resumen.csv` conserva los
+  valores **anteriores** al recálculo con Lloyd-Max. Comparar contra ella da
+  veredictos equivocados en `lowdim`: contra 0.1776 el mejor punto parece
+  victoria, contra 0.0977 es derrota. Las varas vigentes están en
+  `data/baselines_clasicos.csv`.
+- El diccionario `VARAS` codificado en `rbm_stack.py` también es el antiguo.
+  `denoising.py` lo sobrescribe leyendo el CSV; `rbm_stack.py` ejecutado
+  directamente, no.
+
+---
+
 ## Estructura del repositorio
 
 ```
@@ -108,12 +196,25 @@ python3 code/ae_telecom_v4.py --mode full    # barrido completo
 ├── code/
 │   ├── generar_tablas.py      nivel 1: cotas y baselines (sin GPU)
 │   ├── generar_figuras.py     nivel 1: figuras
-│   ├── ae_telecom_v4.py       arnés principal de autoencoders
-│   ├── gate_test.py           test de calibración
-│   ├── check_v4.py            verificación post-corrida
-│   └── run_h200.sh            lanzador multi-GPU
-├── data/                      CSV regenerables (nivel 1)
-└── figs/                      figuras regenerables (nivel 1)
+│   ├── vara_definitiva.py     nivel 1: calcula la vara vigente (Lloyd-Max)
+│   ├── consolidar_varas.py    nivel 1: JSON de varas -> baselines_clasicos.csv
+│   ├── ae_telecom_v4.py       nivel 2: arnés principal de autoencoders
+│   ├── gate_test.py           nivel 2: test de calibración
+│   ├── check_v4.py            nivel 2: verificación post-corrida
+│   ├── run_h200.sh            nivel 2: lanzador multi-GPU
+│   ├── cierre.py              nivel 3: paridad, convolución, datos
+│   ├── confundido.py          nivel 3: checkpoint frente a arquitectura
+│   ├── rbm_stack.py           nivel 3: preentrenamiento fiel a Hinton
+│   ├── umbral.py              nivel 3: cruzar 10⁻² con decisión blanda
+│   ├── denoising.py           nivel 3: enmascarado de entrada
+│   ├── combinado.py           nivel 3: factorial inicialización × ruido
+│   ├── analizar_combinado.py  nivel 3: análisis separado de la corrida
+│   ├── entropia_latente2.py   entropía del latente (estimador autoregresivo)
+│   ├── build_presentacion.py  regenera el PDF de la presentación
+│   └── historico/             arneses v1–v3, solo referencia
+├── data/                      CSV y JSON de resultados
+├── figs/                      figuras regenerables (nivel 1)
+└── presentacion/              PDF de 21 páginas y su página de incrustación
 ```
 
 ## Entorno de referencia
