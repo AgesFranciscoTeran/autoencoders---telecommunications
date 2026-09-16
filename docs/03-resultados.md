@@ -391,7 +391,8 @@ Lo relevante es el mecanismo: mejora **sin que `ber_tapados` se mueva de 0.495**
 El enmascarado actúa aquí como regularizador puro, no por la vía que predice la
 hipótesis de Vincent. Matiza la frase anterior: sobre álgebra el enmascarado
 **sí produce un efecto, solo que no el que se esperaba**. Sigue perdiendo contra
-la vara (0.3350), así que no cambia ningún veredicto.
+la vara (0.3317 con el cuantizador recalculado), así que no cambia ningún
+veredicto.
 
 *(Mismo comentario para `lowdim` L=70, donde *p*=0.50 gana 4/4 de 0.1376 a
 0.1327 mientras *p*=0.10 y *p*=0.25 pierden 0/4. Con sd de 0.0022 en el control,
