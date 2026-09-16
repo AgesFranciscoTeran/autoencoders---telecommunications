@@ -1,0 +1,223 @@
+---
+layout: default
+title: Hacia un paper — qué queda
+---
+
+# Hacia un paper: qué queda
+
+Los tres bloqueantes que tenía esta página están **resueltos**. Lo que queda es
+otra cosa: extensiones que ampliarían el alcance, no huecos que invaliden lo
+hecho.
+
+---
+
+## Resuelto
+
+| brecha original | estado | cómo se resolvió |
+|---|---|---|
+| Barrido de autoencoders sin validar | **cerrada** | calibración in situ: `oversamp direct` L=125 da 3.2 × 10⁻⁷ |
+| Diagnóstico de paridad nunca ejecutado | **cerrada** | ejecutado, y **refutó** la hipótesis que iba a sostener |
+| Una sola semilla | **cerrada** | 4 semillas completas |
+| Vara de PCA débil | **cerrada** | el cuantizador min/max dependía del tamaño de muestra; recalculada con Lloyd-Max. Dos victorias cayeron |
+| Denoising como objetivo auxiliar | **cerrada** | probado en factorial 2×3 con 312 celdas: no abre el camino en `code` y no se compone con el preentrenamiento |
+| Solo encoders MLP | **cerrada** | convolución 1D probada, con la localidad como variable y control en las dos direcciones |
+| `lowdim L=70` sin saturar en datos | **cerrada** | con pasos fijos, saturado desde 400k |
+
+El diagnóstico de paridad merece una nota. Se construyó para **demostrar** que el
+descenso de gradiente no aprende XOR de grado alto, y demostró lo contrario:
+grado 3 se aprende con acc_test = 1.0000. La conclusión sobre `code` sobrevive
+—el autoencoder sí fracasa— pero con un mecanismo distinto y mejor sustentado.
+Un diagnóstico que refuta la hipótesis de quien lo diseñó es evidencia de que el
+diseño era honesto.
+
+---
+
+## Contribuciones, ordenadas por fuerza
+
+### 1. Mapa de viabilidad por tipo de estructura
+
+En lugar de un veredicto único sobre "los autoencoders en telecomunicaciones",
+un mapa que dice para qué tipo de redundancia sirven, a qué tasa, y con qué
+arquitectura. Cada punto con cota teórica, baseline clásico y barras de error
+sobre cuatro semillas.
+
+El resultado quedó así: **gana a las cuatro tasas sobre estructura correlacional,
+y solo en los extremos sobre estructura geométrica**, con la vara recalculada con
+Lloyd-Max. En la zona media de `lowdim` —una fuente casi lineal— PCA con
+cuantizador óptimo lo supera.
+
+*Sustento:* completo, con la vara reforzada en dos rondas independientes.
+
+### 2. Resultado negativo sobre redundancia algebraica
+
+El autoencoder recorre el 21 % del camino entre la estrategia trivial y el
+óptimo sobre un código de bloque, pese a que el oráculo demuestra compresión sin
+pérdida al 50 % de la tasa. Con tres evidencias convergentes: PCA es igualmente
+ciego, un FEC de decisión blanda no ayudaría, y la estructura **sí** es
+aprendible con supervisión directa.
+
+*Sustento:* completo. La explicación es "el objetivo de reconstrucción no genera
+camino de gradiente", no "SGD no puede con paridad".
+
+### 2b. El denoising mide el mecanismo, y confirma la ceguera desde otro ángulo
+
+`ber_tapados` —BER restringido a las posiciones corrompidas— distingue «no
+ayuda» de «no aprende». Sobre `lowdim` y `markov` da 0.07–0.11; sobre `code`,
+0.4946 con cualquier inicialización. El enmascarado sí abre el camino de
+gradiente, pero no hacia estructura algebraica.
+
+*Sustento:* completo, 312 celdas, 4 semillas, con hipótesis primaria registrada.
+
+### 3. Correspondencia arquitectura–estructura
+
+La convolución ayuda con estructura local (+10.3 % en `oversamp`) y **estorba**
+con estructura global (−21.4 % en `lowdim`). Confirmación en las dos
+direcciones, que es lo que la hace sólida.
+
+*Sustento:* completo, aunque con dos escalones (L=70 y L=125) y una sola semilla
+por configuración.
+
+### 3b. Interacción arquitectura–tasa y preentrenamiento
+
+La escalera estrecha supera al MLP ancho a tasas holgadas (L ≥ 125) y pierde a
+tasas agresivas (L=35), con protocolo idéntico y 4 semillas. Y el
+preentrenamiento fiel a Hinton gana en 16/16 celdas, refutando la predicción
+registrada.
+
+*Sustento:* completo, 4 semillas. Falta el control de cómputo igualado para el
+preentrenamiento.
+
+### 4. Inestabilidad de escala en latentes binarios
+
+Modo de fallo con mecanismo identificado y confirmado por medición (`pre_max`
+correlaciona monótonamente con el BER final). Aplica a cualquier autoencoder con
+latente binario y straight-through, no solo a este proyecto.
+
+*Sustento:* completo, y probablemente lo más transferible.
+
+### 5. Códec escalable anidado
+
+Anidar cuesta +0.0011 BER de mediana y produce cuatro puntos de operación con un
+solo modelo. La teoría de refinamiento sucesivo advertía de una brecha; la
+medición dice que es despreciable.
+
+*Sustento:* completo.
+
+### 6. PCA es ciego a la redundancia algebraica
+
+Diferencia dentro de 1σ sobre 10 semillas.
+
+*Sustento:* completo, pero **es resultado de apoyo, no titular**. A alguien con
+formación en teoría de la información no le sorprende que un método de segundo
+orden no vea XOR de grado 3. Su valor está en establecer el contraste contra el
+cual el resultado del autoencoder cobra sentido.
+
+---
+
+## Lo que ampliaría el alcance
+
+Ninguno de estos invalida lo hecho. Son extensiones.
+
+| # | Extensión | Por qué |
+|---|---|---|
+| 1 | Un objetivo auxiliar que supervise la estructura algebraica | Es la vía directa que abre el resultado del diagnóstico de paridad: si el obstáculo es el objetivo, cámbiese el objetivo |
+| 2 | Señales reales (LDPC estándar, conjuntos públicos de RF) | Todas las fuentes son sintéticas. Es fortaleza metodológica —permite cotas exactas— pero un paper aplicado necesita un caso real |
+| 3 | Convolución en los cuatro escalones y con varias semillas | Probada en dos escalones con una semilla |
+| 4 | Selección de checkpoint por validación en todo el barrido | 1 de 4 semillas divergió; `gate_test3.py` ya lo implementa |
+| 5 | Mejor modelo de entropía del latente (MADE, transformer) | El modelo autoregresivo lineal da una cota probablemente floja; el GRU falló porque el latente no tiene orden natural |
+| 7 | Barrer el grado del check: correr el arnés sobre una fuente `code` de grado 2 | El diagnóstico barrió grados 1–4, pero el autoencoder solo corrió sobre grado 3. Si también fracasa en grado 2 —resoluble por un mapa cuadrático— el resultado negativo se fortalece; si lo explota, queda localizada la frontera exacta del objetivo de reconstrucción |
+| 8 | ~~Ajuste fino con tasa pequeña para preentrenados~~ | Probado: en L=250 empeora un 74 %. Solo aplicaría a L=35 |
+| 9 | Búsqueda de arquitectura por tasa | Ancho a tasas agresivas, escalera a holgadas: falta barrer anchos intermedios |
+| 10 | Simulación post-FEC con LDPC real | Convierte la estructura de confianza favorable en una cifra de BER operativo |
+| 12 | Correr `flip` sobre `code`, y añadir `oversamp` a la rejilla | `flip` es la corrupción adecuada para un código de bloque; con `oversamp` la tabla de `ber_tapados` queda como una escalera de cinco puntos ordenada por entropía |
+| 13 | Repetir el factorial sobre `code` con el MLP ancho | La escalera estrecha rinde 0.2477 ahí, por debajo del 0.1982 del barrido v4 |
+| 11 | Cuantizador que minimice BER en vez de MSE | Lloyd-Max es óptimo en MSE de la proyección, no en la métrica del proyecto. Podría fortalecer la vara aún más, aunque la evidencia sugiere retornos decrecientes |
+| 6 | VQ-VAE | La variante de VAE que aplica: latentes discretos y codebook como modelo de entropía. Un VAE gaussiano iría en contra: el término KL acota superiormente `I(x;z)` y reduciría la información justo cuando se quiere maximizarla |
+
+La extensión 1 es la más valiosa: convierte un resultado negativo en una
+pregunta con respuesta posible.
+
+---
+
+## Correspondencia cuaderno → paper
+
+| Sección del paper | De dónde sale |
+|---|---|
+| Introducción y motivación | `index.md` |
+| Trabajo relacionado | `04-bibliografia.md` (ya mapea qué establece cada obra) |
+| Formulación del problema | `01-teoria.md` (cotas, tasa, métrica) |
+| Metodología | `02-metodologia.md` (fuentes, modos, baselines, controles) |
+| Configuración experimental | `05-reproducir.md` |
+| Resultados | `03-resultados.md` |
+| Limitaciones | esta página |
+| Reproducibilidad | `code/` + `data/procedencia.json` |
+| Apéndice: correcciones | `00-bitacora.md` |
+
+La bitácora no va al paper, pero alimenta la sección de limitaciones y el
+apéndice. Las siete correcciones de medición documentadas —incluidas las tres
+hipótesis refutadas— son exactamente lo que un revisor pregunta.
+
+---
+
+## Prácticas que valieron la pena
+
+**Prueba de calibración con respuesta conocida.** `oversamp` con el doble de
+bits necesarios debe dar BER ≈ 0. Nueve rondas de depuración se justificaron
+porque sin ella los 60 números medían bugs, no autoencoders.
+
+**Controles con predicción explícita en ambas direcciones.** El control de la
+convolución funcionó porque predecía dónde *no* debía ayudar. El de `random`
+funcionó porque una victoria consistente ahí habría invalidado todo.
+
+**Cotas de cordura automáticas.** La cota de Fano detectó que el primer
+estimador de entropía daba resultados imposibles. El control de monotonía
+detecta divergencias que un BER aislado no delata.
+
+**Separar variables confundidas.** Pasos fijos frente a épocas fijas cambió la
+conclusión sobre los datos. Variar `n_in` en el diagnóstico de paridad separó
+"aprender XOR" de "encontrar el subconjunto".
+
+**Procedencia automática.** `data/procedencia.json` con fecha, semillas,
+versiones y hash de cada script.
+
+---
+
+## Preguntas abiertas
+
+1. ¿Un objetivo auxiliar permitiría explotar la redundancia algebraica?
+   **Respondida para el enmascarado, no cerrada.** El modelo aprende a inferir
+   bits tapados en `lowdim` y `markov` pero sobre `code` apenas: 0.4946 ± 0.0074,
+   un 2.3 % por encima de azar. Falta probarlo con `flip`, que es la corrupción
+   teóricamente adecuada sobre un código de bloque —corregir volteos con los
+   checks es decodificación por síndrome— y está implementada sin correr.
+2. ¿Se mantiene el resultado sobre `code` con un LDPC estándar en lugar de un
+   código sintético?
+3. ¿Cuál es la entropía real del latente con un modelo autoregresivo mejor que
+   el lineal?
+4. ¿Existe alguna combinación de tasa y estructura donde el autoencoder cruce el
+   umbral de 10⁻² sobre una fuente no trivial?
+5. ~~¿Por qué el preentrenamiento voraz por capas perjudica en este problema?~~
+   **Cerrada, con respuesta contraria a la esperada.** No perjudica: el `stacked`
+   de v4 no era la receta de Hinton. La reproducción fiel gana en 16/16 celdas.
+6. ¿El fracaso sobre `code` depende del grado del check, o el objetivo de
+   reconstrucción no alcanza la estructura algebraica a ningún grado?
+7. ¿Por qué la escalera estrecha supera al MLP ancho a tasas holgadas y pierde a
+   tasas agresivas? ¿Capacidad frente a sobreajuste, o el sesgo de las sigmoides?
+8. ~~¿Con qué tasa de ajuste fino los preentrenados dejan de degradarse?~~
+   **Cerrada: refutada.** En L=250 no se degradan; `lr = 1e-4` da un 74 % peor
+   por subentrenamiento. La degradación temprana era específica de L=35.
+9. ~~¿Cruza `markov` L=250 con RBM el umbral con salida blanda?~~ **Cerrada: sí,
+   4/4 semillas, top90 = 0.0011.** Con BER total no (0.0107).
+10. ¿Qué BER post-FEC da un decodificador LDPC real sobre los LLR del punto
+   `markov` L=250? Es lo que convertiría «favorable a decisión blanda» en una
+   cifra operativa.
+
+---
+
+## Antes de publicar
+
+- Verificar todos los datos bibliográficos contra las fuentes originales.
+- Decidir la atribución institucional y consultarla con quien corresponda.
+- Revisar que no quede material que no deba hacerse público.
+- Ejecutar el nivel 1 de reproducción en una máquina limpia y confirmar que los
+  números coinciden.

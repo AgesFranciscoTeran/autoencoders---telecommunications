@@ -252,6 +252,10 @@ Si hubiera que resumir el proyecto en una frase por etapa:
     Sepáralas por construcción.
 20. Guarda los parciales: comparar contra ellos fue lo único que delató que el
     resultado final estaba contaminado.
+21. Si publicas el CSV, alguien lo abrirá. Toda afirmación del texto tiene que
+    sobrevivir a tres líneas de pandas sobre tus propios datos.
+22. «No infiere nada» y «infiere el 2 %» se escriben parecido y se refutan muy
+    distinto. Mide antes de escribir el absoluto.
 
 ---
 
@@ -547,7 +551,7 @@ nueva `ber_tapados`, que mide si el modelo infiere los bits ocultos:
 | `markov` L=250 | 0.0762 | infiere con fuerza |
 
 El denoising **sí** abre el camino de gradiente — pero no sobre estructura
-algebraica. Tercera evidencia independiente de la ceguera, con una medición
+algebraica. Cuarta evidencia independiente de la ceguera, con una medición
 distinta al BER y a PCA. Y `code` y `random` coinciden hasta la quinta cifra.
 
 Sorpresa: `lowdim` L=250 con p=0.10 da 0.0346, mejor que el preentrenamiento
@@ -575,7 +579,7 @@ con RBM, que además es el único que roza el umbral operativo.
 El baseline lo construí yo con min/max, y reporté los 216 σ sin cuestionarlo.
 El error estuvo desde el principio del proyecto.
 
-### 2026-09-16 · El factorial: preentrenamiento y ruido compiten
+### 2026-09-15 · El factorial: preentrenamiento y ruido compiten
 
 Cinco hipótesis registradas antes de correr, cinco resueltas, cero hallazgos que
 requieran réplica.
@@ -592,9 +596,10 @@ requieran réplica.
   que argumenté —redundancia entre reguladores, rendimientos decrecientes— es lo
   que ocurre. Una predicción cuyo enunciado contradice su propio razonamiento no
   es una predicción: cuenta como refutada.
-- **H5 confirmada.** `ber_tapados` = 0.4946 sobre 64 celdas de `code`, con las
-  dos inicializaciones. Ni partiendo de un preentrenamiento generativo aprende a
-  inferir un bit tapado.
+- **H5 confirmada.** `ber_tapados` = 0.4946 ± 0.0074 sobre 64 celdas de `code`, con las
+  dos inicializaciones. Está 5.9 sd por debajo de 0.5, así que no es azar
+  exacto: recupera ~2.3 % del camino a la inferencia perfecta. Ni partiendo de
+  un preentrenamiento generativo pasa de ahí.
 - **Lectura:** construir estructura y perturbarla compiten. El caso extremo es
   `lowdim` L=35, interacción +0.0120.
 - **Control negativo:** sobre `random`, el RBM **empeora** (0.2477 → 0.2581).
@@ -614,6 +619,39 @@ requieran réplica.
 3. Lo detectó el control de **checkpoint temprano**, no el de semilla atípica.
    Éste solo decía «la semilla 0 está peor»; aquél dio el mecanismo: `@step` 570
    es múltiplo de 15, y solo el modo humo evalúa cada 15 pasos.
+
+### 2026-09-15 · Revisión externa del repositorio
+
+Una revisión contra los CSV publicados encontró siete problemas. Todos ciertos.
+
+- **Artefacto contaminado en el repo.** `data/combinado/combinado.json` tenía
+  las 78 filas del humo, no las 312 reales. Causa: en `main()` el CSV se escribe
+  *antes* del resumen y el JSON *después*, y el resumen reventó con un
+  `ValueError`. Nunca se llegó a reescribir el JSON, que quedó el del humo. Eso
+  explica también el `Exit 1`. El `.jsonl` y el `.csv` sí son correctos.
+- **«Azar exacto» no se sostiene.** 0.4946 ± 0.0074 sobre 64 celdas está a 5.9
+  sd de 0.5, y el desvío crece monótonamente con la tasa. La versión defendible
+  es «recupera ~2 % de la estructura disponible». La anterior era falsable con
+  tres líneas de pandas sobre el CSV que yo mismo publiqué.
+- **Tabla mezclando dos experimentos.** La fila de `code` venía del factorial y
+  las otras tres de la corrida de denoising. Dos valores para la misma celda en
+  dos páginas del repo.
+- **`code` L=125 sin reportar.** Mejora monótona con *p*, 4/4 en las tres, 24 sd
+  en la mejor. Lo había visto y lo llamé «ligero». Refuta P4 más
+  directamente que el caso que sí cité.
+- **Confundido del checkpoint.** Sobre `code` y `random` el mejor checkpoint
+  llega en el paso ~1 500 de 30 000, y el valor de `code` L=250 (0.2477) está en
+  la solución trivial y por debajo del 0.1982 que el propio barrido v4 tenía.
+  La línea plana está medida donde esa arquitectura no progresa.
+- **`flip` sin correr.** Sobre `code` es la corrupción teóricamente adecuada
+  —corregir volteos con los checks es decodificación por síndrome—, está
+  implementada y sin ejecutar. «Cerrada» era prematuro.
+- **Fecha en el futuro**, en un documento cuyo argumento central es la
+  trazabilidad.
+
+Todos aplicados. La lección: publicar los CSV hace el trabajo verificable, y
+eso corta en las dos direcciones. Cuatro de los siete se encuentran abriendo el
+CSV con pandas.
 
 Ver [Hacia un paper](07-hacia-paper.md) para lo que queda abierto.
 

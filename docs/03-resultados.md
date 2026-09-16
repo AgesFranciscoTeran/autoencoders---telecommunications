@@ -334,21 +334,82 @@ directamente si el modelo infiere los bits ocultos.
 
 | fuente | L | `ber_tapados` | |
 |---|---|---|---|
-| `code` | 250 | **0.4946** | azar: no infiere nada |
-| `random` | 250 | 0.5000 | correcto, es imposible |
-| `lowdim` | 250 | 0.1129 | infiere con fuerza |
-| `markov` | 250 | 0.0762 | infiere con fuerza |
+| `code` | 250 | **0.5001 ± 0.0004** | prácticamente azar |
+| `random` | 250 | 0.5000 ± 0.0004 | correcto, es imposible |
+| `lowdim` | 250 | 0.1421 ± 0.0301 | infiere con fuerza |
+| `markov` | 250 | 0.0980 ± 0.0225 | infiere con fuerza |
 
-**El mecanismo funciona; lo que no funciona es sobre estructura algebraica.** En
-`lowdim` y `markov` el modelo sí aprende a rellenar lo que se le tapa. En `code`
-se queda en azar exacto, con 64 celdas y las dos inicializaciones. Es la cuarta
-evidencia independiente de la misma ceguera, y la primera que mide el mecanismo
-en lugar del resultado.
+*(Las cuatro filas salen de la misma corrida de denoising, para que sean
+comparables entre sí.)*
+
+**El mecanismo funciona; sobre estructura algebraica, apenas.** En `lowdim` y
+`markov` el modelo aprende a rellenar lo que se le tapa. En `code` se queda al
+borde del azar.
+
+**Una precisión que el dato exige.** En el factorial posterior, con 64 celdas de
+`code` y las dos inicializaciones, el valor es **0.4946 ± 0.0074**: está 5.9
+desviaciones por debajo de 0.5, así que *no es azar exacto*. Y el desvío crece
+con la tasa de forma monótona; a L=250 con *p*=0.10 llega a 0.4884, o sea que
+recupera un **2.3 % del camino** hacia la inferencia perfecta. Comparado con
+`random`, cuya desviación estándar es veinte veces menor, la diferencia es real.
+
+Es una cifra pequeña, y rima con el 21 % del camino que el autoencoder recorre
+en BER sobre esa misma fuente. La afirmación defendible es *«recupera en torno
+al 2 % de la estructura disponible»*, no *«no infiere nada»*: esta última es
+falsable con tres líneas de pandas sobre el CSV publicado.
 
 Como regularizador sí sirve en un punto: `lowdim` L=250 con *p*=0.10 da
-**0.0346**, mejor que el preentrenamiento RBM (0.0369) y que la inicialización
+**0.0346**, mejor que el preentrenamiento RBM (0.0370) y que la inicialización
 aleatoria (0.0386). No cambia ningún veredicto —ese punto ya ganaba— pero
 amplía su margen.
+
+### El enmascarado ayuda en `code`, pero no por el mecanismo de Vincent
+
+En `code` L=125 el BER baja de forma **monótona con el ruido**, y gana en 4/4
+semillas en las tres *p*:
+
+| *p* | BER |
+|---|---|
+| 0.00 | 0.34397 ± 0.00030 |
+| 0.10 | 0.34331 ± 0.00015 |
+| 0.25 | 0.34191 ± 0.00009 |
+| **0.50** | **0.33987 ± 0.00017** |
+
+La mejora es de 0.0041, unas **24 desviaciones**. Refuta P4 («*p*=0.50 empeora
+en todas las fuentes») mucho más directamente que el caso de `lowdim` L=70.
+
+Lo relevante es el mecanismo: mejora **sin que `ber_tapados` se mueva de 0.495**.
+El enmascarado actúa aquí como regularizador puro, no por la vía que predice la
+hipótesis de Vincent. Matiza la frase anterior: sobre álgebra el enmascarado
+**sí produce un efecto, solo que no el que se esperaba**. Sigue perdiendo contra
+la vara (0.3350), así que no cambia ningún veredicto.
+
+*(Mismo comentario para `lowdim` L=70, donde *p*=0.50 gana 4/4 de 0.1376 a
+0.1327 mientras *p*=0.10 y *p*=0.25 pierden 0/4. Con sd de 0.0022 en el control,
+esa victoria es de 2 a 3 sigmas: más frágil de lo que sugiere el 4/4.)*
+
+### Limitación: sobre `code` el arnés rinde por debajo del mejor conocido
+
+El factorial usa la **escalera estrecha**, y sobre `code` rinde peor que el MLP
+ancho del barrido v4:
+
+| | `code` L=250 |
+|---|---|
+| copiar 250 bits y adivinar el resto | 0.2500 |
+| **factorial, escalera estrecha, *p*=0** | **0.2477** |
+| barrido v4, MLP ancho | 0.1982 |
+
+El valor del factorial está prácticamente en la solución trivial. Y el mejor
+checkpoint llega en el paso **~1 500 de 30 000** sobre `code` y `random`, frente
+a ~27 750 sobre `lowdim` y `markov`: el modelo alcanza la solución trivial
+pronto y se degrada después. Entrenó los 30 000 pasos —no se cortó— pero dejó de
+mejorar en el 5 % inicial.
+
+**La línea plana de `code` está medida en un régimen donde esa arquitectura no
+progresa**, y por debajo del mejor punto que el propio proyecto ya tenía para esa
+celda. No creo que cambie el veredicto, porque `ber_tapados` es evidencia más
+directa que el BER y apunta igual, pero es la primera objeción que un revisor
+plantearía y debe constar.
 
 ### Preentrenamiento y ruido compiten
 
@@ -374,6 +435,14 @@ enmascarado la perturba — **construir y perturbar compiten**. El caso extremo 
 Incluso donde el ruido es lo mejor que hay (`lowdim` L=250, 0.0346), combinarlo
 con RBM da 0.0347: ni suma ni resta. Cada mecanismo funciona por separado y se
 estorban juntos.
+
+**Lo que no se probó.** Solo se ejecutó el modo `mask`; no se ejecutó `flip`
+(voltear bits en vez de borrarlos). Sobre `code`, `flip` es la corrupción
+teóricamente más adecuada: con `mask` el modelo sabe *qué* posiciones faltan,
+mientras que con `flip` no lo sabe, y corregir volteos usando los checks es
+literalmente **decodificación por síndrome** — para lo que existe un código de
+bloque. Es la prueba más adversa que se le puede hacer a esta conclusión, está
+implementada y sin correr. Tampoco se incluyó `oversamp` en la rejilla.
 
 ---
 

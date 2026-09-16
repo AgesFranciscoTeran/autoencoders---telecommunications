@@ -18,6 +18,10 @@ El script vive en `code/rbm_stack.py` del clon de trabajo; copiar aquí.
 
 ### Resumen (BER de test, media sobre 4 semillas)
 
+> **Aviso.** Las varas de esta tabla son las ANTERIORES al recálculo con
+> Lloyd-Max. Las vigentes están en `data/baselines_clasicos.csv`; para
+> `lowdim` L=70 la vara correcta es 0.0977, no 0.1861.
+
 | fuente | L | aleatoria | pre. AE | pre. RBM | vara |
 |---|---|---|---|---|---|
 | lowdim | 35 | 0.2610 | **0.1833** | 0.1911 | 0.1954 |

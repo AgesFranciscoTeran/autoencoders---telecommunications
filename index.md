@@ -50,7 +50,7 @@ Referencia: [Teoría](docs/01-teoria.md) ·
 | Interacción arquitectura–tasa | Firme (4 semillas, protocolo idéntico) |
 | Vara clásica (Lloyd-Max) | Firme — reforzada en dos rondas |
 | Denoising sobre `code` | Firme — **no** abre el camino de gradiente |
-| Denoising como objetivo auxiliar | Cerrada — no se compone con el preentrenamiento |
+| Denoising como objetivo auxiliar | Firme para enmascarado; `flip` sin probar |
 
 **Proyecto cerrado.** La respuesta corta: los autoencoders **no** son viables
 para comprimir flujos de bits BPSK a tasas agresivas — 18 de 20 puntos del

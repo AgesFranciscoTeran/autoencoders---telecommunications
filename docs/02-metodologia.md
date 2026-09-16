@@ -158,10 +158,24 @@ da resultados opuestos.
 
 La vara. Todos usan **el mismo número de bits** que el autoencoder.
 
-**PCA + cuantización uniforme.** El competidor justo: aprendido de datos, sin
-oráculo, sin red neuronal. Se prueban combinaciones de $$d$$ componentes por $$b$$
-bits tales que $$d \cdot b = L$$, y se reporta la mejor. La eigendescomposición se
+**PCA + cuantización.** El competidor justo: aprendido de datos, sin oráculo,
+sin red neuronal. Se prueban combinaciones de $$d$$ componentes por $$b$$ bits
+tales que $$d \cdot b = L$$, y se reporta la mejor. La eigendescomposición se
 calcula una sola vez por fuente.
+
+El cuantizador es **escalar óptimo en MSE por componente** (Lloyd-Max, ajustado
+sobre las proyecciones de entrenamiento). La primera versión usaba un rango
+uniforme entre el mínimo y el máximo observados, y eso resultó ser un error
+serio: ese rango **crece con el número de muestras**, así que la vara empeoraba
+cuantos más datos se le daban. Con Lloyd-Max la vara de `lowdim` L=70 pasa de
+0.1861 a 0.0977, e invalida dos victorias que se habían publicado.
+
+También se probó reemplazar la síntesis `zq @ Vᵀ + μ` por el decoder lineal
+óptimo por mínimos cuadrados. No mejora en ninguna celda: con PCA la base es
+ortonormal, así que la transpuesta ya era la síntesis óptima. Detalle en
+[Resultados](03-resultados.md).
+
+*Límite:* el cuantizador es óptimo en MSE de la proyección, no en BER.
 
 **Decimación.** Envía 1 de cada $$m$$ símbolos. Se evalúan **dos**
 reconstrucciones: *sample-and-hold* y *vecino más cercano*. La distinción

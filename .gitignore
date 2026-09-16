@@ -5,3 +5,4 @@ res/
 ae_results*/
 _site/
 .jekyll-cache/
+*.tar.gz

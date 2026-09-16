@@ -121,9 +121,8 @@ def main():
     if a.quick:
         cfg.update(n_train=40000, n_test=5000, ft_steps=600, rbm_steps=400)
         a.seeds = a.seeds[:1]
-    salida = SALIDA + ("_smoke" if a.quick else "")   # el humo no contamina
-    os.makedirs(salida, exist_ok=True)
-    JSONL = os.path.join(salida, "combinado.jsonl")
+    os.makedirs(SALIDA, exist_ok=True)
+    JSONL = os.path.join(SALIDA, "combinado.jsonl")
 
     def clave(f, L, arm, p, seed):
         return f"{f}|{L}|{arm}|{p}|{seed}"
@@ -179,8 +178,6 @@ def main():
                 filas.append(fila)
                 with open(JSONL, "a") as fh:          # volcado inmediato: reanudable
                     fh.write(json.dumps(fila) + "\n")
-                    fh.flush(); os.fsync(fh.fileno())  # a disco YA: si el
-                    # contenedor muere de golpe, lo no sincronizado se pierde
                 hechas.add(clave(fuente, L, arm, p, seed))
             del Xtr, Xva, Xte
             if dev == "cuda": torch.cuda.empty_cache()
@@ -188,7 +185,7 @@ def main():
     if not filas:
         sys.exit("[!] no hay filas: nada que resumir")
     import csv
-    with open(os.path.join(salida, "combinado.csv"), "w", newline="") as f:
+    with open(os.path.join(SALIDA, "combinado.csv"), "w", newline="") as f:
         w = csv.DictWriter(f, fieldnames=list(filas[0].keys()))
         w.writeheader(); w.writerows(filas)
 
@@ -235,11 +232,8 @@ def main():
         b00 = cel(f, L, "ladder_random", 0.0)
         if b00 is None: continue
         b10 = cel(f, L, "stacked_rbm", 0.0)
-        cand = [(p, cel(f, L, "ladder_random", p)) for p in a.p if p > 0]
-        cand = [(p, v) for p, v in cand if v is not None]
-        if not cand:
-            continue
-        pbest = min(cand, key=lambda t: t[1].mean())[0]
+        pbest = min([p for p in a.p if p > 0],
+                    key=lambda p: (cel(f, L, "ladder_random", p) or np.array([9])).mean())
         b01 = cel(f, L, "ladder_random", pbest)
         b11 = cel(f, L, "stacked_rbm", pbest)
         if any(x is None for x in (b10, b01, b11)): continue
@@ -272,7 +266,7 @@ def main():
         print("\n  Sin hallazgos exploratorios que superen el umbral de replica.")
 
     json.dump(dict(filas=filas, primaria=PRIMARIA, args=vars(a)),
-              open(os.path.join(salida, "combinado.json"), "w"), indent=1)
+              open(os.path.join(SALIDA, "combinado.json"), "w"), indent=1)
     print(f"\nescrito en {SALIDA}/")
 
 
