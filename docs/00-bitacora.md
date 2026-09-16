@@ -248,6 +248,10 @@ Si hubiera que resumir el proyecto en una frase por etapa:
     atacarlo tan en serio como al método propio.
 18. Una métrica que mide el mecanismo vale más que una que mide el resultado:
     `ber_tapados` distinguió «no ayuda» de «no aprende».
+19. Una salvaguarda manual entre dos corridas es una salvaguarda que fallará.
+    Sepáralas por construcción.
+20. Guarda los parciales: comparar contra ellos fue lo único que delató que el
+    resultado final estaba contaminado.
 
 ---
 
@@ -570,6 +574,46 @@ con RBM, que además es el único que roza el umbral operativo.
 
 El baseline lo construí yo con min/max, y reporté los 216 σ sin cuestionarlo.
 El error estuvo desde el principio del proyecto.
+
+### 2026-09-16 · El factorial: preentrenamiento y ruido compiten
+
+Cinco hipótesis registradas antes de correr, cinco resueltas, cero hallazgos que
+requieran réplica.
+
+- **H1 confirmada.** `markov` L=250: RBM + ruido no mejora sobre RBM solo en
+  **0/4 semillas en las seis condiciones**. El mejor sigue siendo RBM sin ruido,
+  0.0107 ± 0.0001.
+- **H2 confirmada.** Nada cruza 10⁻² con BER total.
+- **H3 refutada.** `lowdim` L=250 era el único sitio donde esperaba composición
+  positiva: solo RBM 0.0370, solo ruido 0.0346, ambos 0.0347. Empatan.
+- **H4 refutada, con el razonamiento correcto.** La redacté como «juntos dan
+  menos que la suma», que literalmente significa mejor que aditivo; lo observado
+  es lo contrario (11/13 interacciones positivas, mediana +0.0018). El mecanismo
+  que argumenté —redundancia entre reguladores, rendimientos decrecientes— es lo
+  que ocurre. Una predicción cuyo enunciado contradice su propio razonamiento no
+  es una predicción: cuenta como refutada.
+- **H5 confirmada.** `ber_tapados` = 0.4946 sobre 64 celdas de `code`, con las
+  dos inicializaciones. Ni partiendo de un preentrenamiento generativo aprende a
+  inferir un bit tapado.
+- **Lectura:** construir estructura y perturbarla compiten. El caso extremo es
+  `lowdim` L=35, interacción +0.0120.
+- **Control negativo:** sobre `random`, el RBM **empeora** (0.2477 → 0.2581).
+  Un preentrenamiento generativo sobre datos incompresibles aprende estructura
+  donde no la hay.
+
+**Tres incidentes de infraestructura, con su lección.**
+
+1. El contenedor murió a la mitad y se perdieron 41 celdas: `write()` deja los
+   datos en caché del sistema. Corregido con `os.fsync` tras cada celda.
+2. Al reanudar, los valores salieron sistemáticamente peores que en el parcial
+   de 119 celdas — `markov` L=250 pasó de 0.0107 ± 0.0001 a 0.0203 ± 0.0191.
+   **No era divergencia:** eran las 78 celdas del humo (`--quick`, 600 pasos)
+   coladas en el JSONL de la corrida real. La salvaguarda era manual —borrar el
+   directorio entre corridas— y las salvaguardas manuales fallan. Corregido por
+   construcción: `--quick` escribe en otro directorio.
+3. Lo detectó el control de **checkpoint temprano**, no el de semilla atípica.
+   Éste solo decía «la semilla 0 está peor»; aquél dio el mecanismo: `@step` 570
+   es múltiplo de 15, y solo el modo humo evalúa cada 15 pasos.
 
 Ver [Hacia un paper](07-hacia-paper.md) para lo que queda abierto.
 

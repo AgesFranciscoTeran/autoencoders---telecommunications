@@ -317,6 +317,66 @@ concreta de trabajo futuro: un objetivo auxiliar que supervise la estructura.
 
 ---
 
+## El denoising abre el camino de gradiente, pero no sobre álgebra
+
+Si el obstáculo en `code` es que la reconstrucción no genera gradiente hacia la
+estructura, cambiar el objetivo debería resolverlo. El enmascarado de entrada
+(Vincent et al., 2008) es la forma concreta: se tapan al azar una fracción *p*
+de los 500 bits y se exige reconstruir los 500. Acertar un bit tapado obliga a
+usar los demás, y en `code` eso es exactamente aprender el código.
+
+**No funciona.** Sobre `code` L=250 el BER es plano: 0.2477 con *p*=0 y 0.2481
+con *p*=0.50.
+
+Lo que hace interpretable el resultado es una métrica añadida para el caso,
+`ber_tapados`: el BER medido **solo en las posiciones corrompidas**, que mide
+directamente si el modelo infiere los bits ocultos.
+
+| fuente | L | `ber_tapados` | |
+|---|---|---|---|
+| `code` | 250 | **0.4946** | azar: no infiere nada |
+| `random` | 250 | 0.5000 | correcto, es imposible |
+| `lowdim` | 250 | 0.1129 | infiere con fuerza |
+| `markov` | 250 | 0.0762 | infiere con fuerza |
+
+**El mecanismo funciona; lo que no funciona es sobre estructura algebraica.** En
+`lowdim` y `markov` el modelo sí aprende a rellenar lo que se le tapa. En `code`
+se queda en azar exacto, con 64 celdas y las dos inicializaciones. Es la cuarta
+evidencia independiente de la misma ceguera, y la primera que mide el mecanismo
+en lugar del resultado.
+
+Como regularizador sí sirve en un punto: `lowdim` L=250 con *p*=0.10 da
+**0.0346**, mejor que el preentrenamiento RBM (0.0369) y que la inicialización
+aleatoria (0.0386). No cambia ningún veredicto —ese punto ya ganaba— pero
+amplía su margen.
+
+### Preentrenamiento y ruido compiten
+
+Factorial 2×3 completo (inicialización aleatoria o RBM × *p* ∈ {0, 0.10, 0.25}),
+13 puntos, 4 semillas, 312 celdas. Hipótesis primaria registrada de antemano
+sobre `markov` L=250; el resto declarado exploratorio.
+
+| inicialización | *p* = 0 | *p* = 0.10 | *p* = 0.25 |
+|---|---|---|---|
+| aleatoria | 0.0135 ± 0.0004 | 0.0140 ± 0.0002 | 0.0207 ± 0.0006 |
+| **RBM** | **0.0107 ± 0.0001** | 0.0116 ± 0.0002 | 0.0168 ± 0.0004 |
+
+Ninguna condición con ruido mejora sobre RBM solo, en **0 de 4 semillas en las
+seis celdas**. El efecto del RBM es casi constante (−0.0028) y el del ruido
+crece con *p*.
+
+**La interacción es positiva en 11 de 13 puntos** (mediana +0.0018): combinar da
+peor que la suma de los efectos por separado. La lectura mecánica es que el
+preentrenamiento coloca los pesos en una configuración estructurada y el
+enmascarado la perturba — **construir y perturbar compiten**. El caso extremo es
+`lowdim` L=35, con interacción +0.0120.
+
+Incluso donde el ruido es lo mejor que hay (`lowdim` L=250, 0.0346), combinarlo
+con RBM da 0.0347: ni suma ni resta. Cada mecanismo funciona por separado y se
+estorban juntos.
+
+---
+
 ## Hallazgos metodológicos
 
 Probablemente lo más transferible del proyecto.

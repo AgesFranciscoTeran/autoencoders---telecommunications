@@ -1,0 +1,17 @@
+nohup: ignoring input
+[reanudar] 78 celdas ya hechas en /home/fteran/autoencoders/data/combinado/combinado.jsonl
+============================================================================================
+COMBINADO | factorial 2x3: inicializacion x ruido de enmascaramiento
+puntos=[('markov', 250), ('markov', 125), ('markov', 70), ('markov', 35), ('lowdim', 250), ('lowdim', 125), ('lowdim', 70), ('lowdim', 35), ('code', 250), ('code', 125), ('code', 70), ('code', 35), ('random', 250)]
+arms=['ladder_random', 'stacked_rbm']  p=[0.0, 0.1, 0.25]  seeds=[0, 1, 2, 3]  -> 312 celdas  (~5.2 h)
+PRIMARIA (confirmatoria): markov L=250  |  el resto es EXPLORATORIO
+============================================================================================
+[skip] markov seed=0: completo
+
+[markov seed=1]  preentrenando RBM...
+      RBM 500->250  err_recon=0.0237  (2s)
+      RBM 250->125  err_recon=0.0461  (2s)
+      RBM 125-> 70  err_recon=0.0642  (2s)
+      RBM  70-> 35  err_recon=0.0855  (2s)
+       L           init     p       BER    top90  tapados  @step
+     250  ladder_random  0.00    0.0140   0.0017      nan  29250  (53s)

@@ -1,0 +1,156 @@
+nohup: ignoring input
+[reanudar] 234 celdas ya hechas en /home/fteran/autoencoders/data/combinado/combinado.jsonl
+============================================================================================
+COMBINADO | factorial 2x3: inicializacion x ruido de enmascaramiento
+puntos=[('markov', 250), ('markov', 125), ('markov', 70), ('markov', 35), ('lowdim', 250), ('lowdim', 125), ('lowdim', 70), ('lowdim', 35), ('code', 250), ('code', 125), ('code', 70), ('code', 35), ('random', 250)]
+arms=['ladder_random', 'stacked_rbm']  p=[0.0, 0.1, 0.25]  seeds=[0, 1, 2, 3]  -> 312 celdas  (~5.2 h)
+PRIMARIA (confirmatoria): markov L=250  |  el resto es EXPLORATORIO
+============================================================================================
+
+[markov seed=0]  preentrenando RBM...
+      RBM 500->250  err_recon=0.0247  (2s)
+      RBM 250->125  err_recon=0.0469  (2s)
+      RBM 125-> 70  err_recon=0.0668  (2s)
+      RBM  70-> 35  err_recon=0.0852  (2s)
+       L           init     p       BER    top90  tapados  @step
+     250  ladder_random  0.00    0.0135   0.0015      nan  29250  (52s)
+     250  ladder_random  0.10    0.0138   0.0016   0.0723  28500  (53s)
+     250  ladder_random  0.25    0.0202   0.0032   0.0708  28500  (52s)
+     250    stacked_rbm  0.00    0.0108   0.0011      nan  29250  (51s)
+     250    stacked_rbm  0.10    0.0115   0.0016   0.0635  28500  (53s)
+     250    stacked_rbm  0.25    0.0168   0.0032   0.0674  28500  (53s)
+     125  ladder_random  0.00    0.0467   0.0182      nan  29250  (60s)
+     125  ladder_random  0.10    0.0444   0.0160   0.0734  28500  (62s)
+     125  ladder_random  0.25    0.0463   0.0166   0.0763  27000  (63s)
+     125    stacked_rbm  0.00    0.0443   0.0176      nan   2250  (61s)
+     125    stacked_rbm  0.10    0.0446   0.0175   0.0769   2250  (62s)
+     125    stacked_rbm  0.25    0.0455   0.0184   0.0813   2250  (62s)
+      70  ladder_random  0.00    0.1006   0.0651      nan  27000  (69s)
+      70  ladder_random  0.10    0.1022   0.0657   0.1208  27000  (71s)
+      70  ladder_random  0.25    0.0998   0.0649   0.1191  28500  (71s)
+      70    stacked_rbm  0.00    0.0891   0.0593      nan    750  (70s)
+      70    stacked_rbm  0.10    0.0891   0.0594   0.1088    750  (71s)
+      70    stacked_rbm  0.25    0.0891   0.0594   0.1119    750  (69s)
+      35  ladder_random  0.00    0.2019   0.1730      nan  29250  (79s)
+      35  ladder_random  0.10    0.2017   0.1727   0.2167  29250  (80s)
+      35  ladder_random  0.25    0.1785   0.1479   0.1881  27000  (79s)
+      35    stacked_rbm  0.00    0.1719   0.1462      nan    750  (78s)
+      35    stacked_rbm  0.10    0.1710   0.1453   0.1813    750  (79s)
+      35    stacked_rbm  0.25    0.1733   0.1473   0.1875    750  (79s)
+[skip] markov seed=1: completo
+[skip] markov seed=2: completo
+[skip] markov seed=3: completo
+
+[lowdim seed=0]  preentrenando RBM...
+      RBM 500->250  err_recon=0.0537  (2s)
+      RBM 250->125  err_recon=0.0505  (2s)
+      RBM 125-> 70  err_recon=0.0525  (2s)
+      RBM  70-> 35  err_recon=0.0716  (2s)
+       L           init     p       BER    top90  tapados  @step
+     250  ladder_random  0.00    0.0393   0.0109      nan  27750  (51s)
+     250  ladder_random  0.10    0.0345   0.0077   0.1126  29250  (53s)
+     250  ladder_random  0.25    0.0400   0.0110   0.1075  24750  (53s)
+     250    stacked_rbm  0.00    0.0375   0.0097      nan  28500  (50s)
+     250    stacked_rbm  0.10    0.0351   0.0080   0.1127  30000  (53s)
+     250    stacked_rbm  0.25    0.0406   0.0114   0.1087  30000  (53s)
+     125  ladder_random  0.00    0.0873   0.0520      nan  30000  (60s)
+     125  ladder_random  0.10    0.0857   0.0503   0.1238  29250  (61s)
+     125  ladder_random  0.25    0.0856   0.0502   0.1299  30000  (62s)
+     125    stacked_rbm  0.00    0.0711   0.0364      nan  28500  (60s)
+     125    stacked_rbm  0.10    0.0712   0.0365   0.1179  29250  (61s)
+     125    stacked_rbm  0.25    0.0769   0.0418   0.1247  27000  (61s)
+      70  ladder_random  0.00    0.1408   0.1069      nan  30000  (67s)
+      70  ladder_random  0.10    0.1433   0.1096   0.1720  29250  (71s)
+      70  ladder_random  0.25    0.1420   0.1082   0.1757  28500  (70s)
+      70    stacked_rbm  0.00    0.1137   0.0787      nan  30000  (70s)
+      70    stacked_rbm  0.10    0.1131   0.0780   0.1455  28500  (69s)
+      70    stacked_rbm  0.25    0.1156   0.0806   0.1520  29250  (71s)
+      35  ladder_random  0.00    0.2584   0.2343      nan  30000  (79s)
+      35  ladder_random  0.10    0.2507   0.2257   0.2689  30000  (80s)
+      35  ladder_random  0.25    0.2519   0.2270   0.2685  28500  (80s)
+      35    stacked_rbm  0.00    0.1909   0.1607      nan   6000  (78s)
+      35    stacked_rbm  0.10    0.1923   0.1622   0.2199  27750  (80s)
+      35    stacked_rbm  0.25    0.1900   0.1597   0.2238  29250  (80s)
+[skip] lowdim seed=1: completo
+[skip] lowdim seed=2: completo
+[skip] lowdim seed=3: completo
+
+[code seed=0]  preentrenando RBM...
+      RBM 500->250  err_recon=0.1759  (2s)
+      RBM 250->125  err_recon=0.1384  (2s)
+      RBM 125-> 70  err_recon=0.1071  (2s)
+      RBM  70-> 35  err_recon=0.0693  (2s)
+       L           init     p       BER    top90  tapados  @step
+     250  ladder_random  0.00    0.2476   0.2225      nan   1500  (51s)
+     250  ladder_random  0.10    0.2476   0.2226   0.4996   1500  (53s)
+     250  ladder_random  0.25    0.2479   0.2228   0.5003   1500  (54s)
+     250    stacked_rbm  0.00    0.2456   0.2177      nan  30000  (52s)
+     250    stacked_rbm  0.10    0.2486   0.2211   0.4760  29250  (53s)
+     250    stacked_rbm  0.25    0.2612   0.2350   0.4823  21750  (53s)
+     125  ladder_random  0.00    0.3443   0.3283      nan   1500  (58s)
+     125  ladder_random  0.10    0.3435   0.3273   0.5005   2250  (63s)
+     125  ladder_random  0.25    0.3420   0.3258   0.5007   2250  (62s)
+     125    stacked_rbm  0.00    0.3658   0.3510      nan  16500  (60s)
+     125    stacked_rbm  0.10    0.3652   0.3502   0.4770  25500  (63s)
+     125    stacked_rbm  0.25    0.3715   0.3572   0.4837  21000  (62s)
+      70  ladder_random  0.00    0.4036   0.3936      nan   2250  (68s)
+      70  ladder_random  0.10    0.4012   0.3911   0.5003   3000  (70s)
+      70  ladder_random  0.25    0.3982   0.3876   0.5005   3000  (71s)
+      70    stacked_rbm  0.00    0.4128   0.4032      nan   3000  (69s)
+      70    stacked_rbm  0.10    0.4116   0.4019   0.4931   3000  (70s)
+      70    stacked_rbm  0.25    0.4096   0.3998   0.4910   4500  (71s)
+      35  ladder_random  0.00    0.4335   0.4265      nan  30000  (78s)
+      35  ladder_random  0.10    0.4348   0.4280   0.4902  28500  (80s)
+      35  ladder_random  0.25    0.4428   0.4369   0.4973  29250  (80s)
+      35    stacked_rbm  0.00    0.4441   0.4380      nan   1500  (79s)
+      35    stacked_rbm  0.10    0.4438   0.4375   0.4898   3750  (80s)
+      35    stacked_rbm  0.25    0.4448   0.4387   0.4985   2250  (80s)
+[skip] code seed=1: completo
+[skip] code seed=2: completo
+[skip] code seed=3: completo
+
+[random seed=0]  preentrenando RBM...
+      RBM 500->250  err_recon=0.1762  (2s)
+      RBM 250->125  err_recon=0.1382  (2s)
+      RBM 125-> 70  err_recon=0.1087  (2s)
+      RBM  70-> 35  err_recon=0.0719  (2s)
+       L           init     p       BER    top90  tapados  @step
+     250  ladder_random  0.00    0.2477   0.2226      nan   1500  (51s)
+     250  ladder_random  0.10    0.2476   0.2226   0.5002   1500  (53s)
+     250  ladder_random  0.25    0.2477   0.2228   0.4997   1500  (53s)
+     250    stacked_rbm  0.00    0.2592   0.2326      nan  29250  (51s)
+     250    stacked_rbm  0.10    0.2615   0.2351   0.4997  27750  (53s)
+     250    stacked_rbm  0.25    0.2658   0.2400   0.4996  29250  (53s)
+[skip] random seed=1: completo
+[skip] random seed=2: completo
+[skip] random seed=3: completo
+
+============================================================================================
+CONFIRMATORIO — hipotesis primaria registrada
+============================================================================================
+  markov L=250, referencia RBM sin ruido: 0.0107
+     ladder_random p=0.0   0.0135 ± 0.0003  mejora sobre RBM en 0/4  cruza 1e-2 en 0/4
+     ladder_random p=0.1   0.0140 ± 0.0002  mejora sobre RBM en 0/4  cruza 1e-2 en 0/4
+     ladder_random p=0.25  0.0207 ± 0.0005  mejora sobre RBM en 0/4  cruza 1e-2 en 0/4
+       stacked_rbm p=0.0   0.0107 ± 0.0001  mejora sobre RBM en 0/4  cruza 1e-2 en 0/4
+       stacked_rbm p=0.1   0.0116 ± 0.0002  mejora sobre RBM en 0/4  cruza 1e-2 en 0/4
+       stacked_rbm p=0.25  0.0168 ± 0.0003  mejora sobre RBM en 0/4  cruza 1e-2 en 0/4
+
+  H1 (RBM+denoising no mejora sobre RBM solo): CONFIRMADA
+  H2 (nada cruza 1e-2 con BER total): CONFIRMADA
+  mejor condicion: stacked_rbm p=0.0 -> 0.0107
+
+============================================================================================
+EXPLORATORIO — genera hipotesis, NO las confirma
+============================================================================================
+fuente      L  solo RBM  solo ruido    ambos  suma esp.  interacc.  nota
+Traceback (most recent call last):
+  File "/home/fteran/autoencoders/code/combinado.py", line 277, in <module>
+    main()
+  File "/home/fteran/autoencoders/code/combinado.py", line 238, in main
+    pbest = min([p for p in a.p if p > 0],
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/fteran/autoencoders/code/combinado.py", line 239, in <lambda>
+    key=lambda p: (cel(f, L, "ladder_random", p) or np.array([9])).mean())
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ValueError: The truth value of an array with more than one element is ambiguous. Use a.any() or a.all()
