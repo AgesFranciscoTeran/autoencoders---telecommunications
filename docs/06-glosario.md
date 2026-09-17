@@ -232,6 +232,22 @@ resultado": es **resultado imposible**, y por tanto un bug.
 **Media contaminada** — El costo medio de anidar salía −0.037 por culpa de una
 corrida colapsada; la mediana daba −0.0006. Con outliers, usar mediana.
 
+**Métrica nueva sin vara** — `ber_tapados` se inventó a mitad del proyecto y se
+reportó durante dos semanas contra 0.5, que es el piso trivial, y contra nada
+por arriba. El proyecto entero insiste en que un BER sin vara no significa nada;
+la regla se aplicó a la métrica principal y no a la que apareció por el camino.
+Peor: la normalización implícita («X % del camino») usaba como denominador la
+inferencia perfecta, que con enmascarado no es alcanzable. Una métrica nueva
+nace sin baseline, y es entonces cuando hay que dárselo, no después de citarla
+en tres páginas.
+
+**Promediar sobre dos regímenes de entrenamiento** — El 0.4946 ± 0.0074 de
+`code` mezclaba un brazo que colapsa en el paso 1 500 y se queda pegado a
+0.5000, con otro que entrena los 30 000 y llega a 0.4803. Casi toda la
+desviación venía de la mezcla, y la media tapaba justo la señal. Antes de
+promediar sobre una condición experimental, comprobar que las celdas están en el
+mismo régimen; `mejor_step` lo delata en una línea.
+
 **Artefacto obsoleto sobreviviendo a un crash** — `combinado.json` se escribe
 *después* del resumen y `combinado.csv` *antes*. Cuando el resumen reventó, el
 JSON quedó con las 78 filas del humo de un día antes, y así se subió al
@@ -239,10 +255,11 @@ repositorio junto a los datos buenos. Un fichero que no se reescribe no avisa de
 que está obsoleto: comparar fechas de modificación entre artefactos de la misma
 corrida lo detecta en un vistazo.
 
-**Absolutos que el CSV refuta** — Escribir «azar exacto» cuando el dato es
-0.4946 ± 0.0074 sobre 64 celdas, que está a 5.9 sd de 0.5. La afirmación
-correcta («recupera ~2 % de la estructura disponible») es más débil y más útil.
-Si publicas los datos, cada absoluto del texto es verificable con tres líneas de
+**Absolutos que el CSV refuta** — Escribir «azar exacto» cuando el dato está a
+varias desviaciones de 0.5. La afirmación correcta es cuantitativa y contra una
+vara: en el brazo que no colapsa, `code` L=250 da 0.4803 ± 0.0047, un 4.8 % de
+la inferencia que el oráculo demuestra disponible. Es más débil y más útil. Si
+publicas los datos, cada absoluto del texto es verificable con tres líneas de
 pandas.
 
 **Salvaguarda manual entre corridas** — La prueba de humo y la corrida real

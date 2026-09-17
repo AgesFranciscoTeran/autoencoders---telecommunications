@@ -19,7 +19,7 @@ hecho.
 | Diagnóstico de paridad nunca ejecutado | **cerrada** | ejecutado, y **refutó** la hipótesis que iba a sostener |
 | Una sola semilla | **cerrada** | 4 semillas completas |
 | Vara de PCA débil | **cerrada** | el cuantizador min/max dependía del tamaño de muestra; recalculada con Lloyd-Max. Dos victorias cayeron |
-| Denoising como objetivo auxiliar | **parcial** | probado en factorial 2×3 con 312 celdas: el enmascarado no abre el camino en `code` y no se compone con el preentrenamiento. Falta `flip`, ver extensión 12 |
+| Denoising como objetivo auxiliar | **parcial** | probado en factorial 2×3 con 312 celdas y normalizado contra la vara de `ber_tapados`: a L=250 el modelo recupera el 4.8 % de la inferencia disponible sobre `code`, frente al 87 % en `lowdim` y el 97 % en `markov`. Falta `flip`, ver extensión 12 |
 | Solo encoders MLP | **cerrada** | convolución 1D probada, con la localidad como variable y control en las dos direcciones |
 | `lowdim L=70` sin saturar en datos | **cerrada** | con pasos fijos, saturado desde 400k |
 | La vara vigente no se podía regenerar | **cerrada** | `vara_definitiva.py` calcula y `consolidar_varas.py` formatea; `generar_tablas.py` ya no pisa el archivo |
@@ -63,14 +63,26 @@ camino de gradiente", no "SGD no puede con paridad".
 ### 2b. El denoising mide el mecanismo, y confirma la ceguera desde otro ángulo
 
 `ber_tapados` —BER restringido a las posiciones corrompidas— distingue «no
-ayuda» de «no aprende». Sobre `lowdim` y `markov` da 0.07–0.11; sobre `code`,
-0.4946 con cualquier inicialización. El enmascarado sí abre el camino de
+ayuda» de «no aprende», y `vara_tapados.py` le pone el techo que le faltaba: el
+mejor valor alcanzable por quien conoce la estructura de la fuente. Normalizado
+contra esa vara, a *p*=0.10 y L=250, el autoencoder recupera el **97 %** de la
+inferencia disponible sobre `markov`, el **87 %** sobre `lowdim` y el **4.8 %**
+sobre `code`.
+
+Lo que ordena el resultado es que el piso de `code` es el más bajo de los tres
+(0.0231: el 97.7 % de los bits tapados se determina exactamente por rango sobre
+GF(2)). La redundancia algebraica es la estructura **más** informativa para
+rellenar huecos, y la que menos se explota. El enmascarado sí abre el camino de
 gradiente, pero no hacia estructura algebraica.
 
-*Sustento:* 312 celdas, 4 semillas, con hipótesis primaria registrada. Con dos
-reservas declaradas en [Resultados](03-resultados.md): sobre `code` la escalera
-estrecha se queda en 0.2477, por debajo del 0.1982 del barrido v4, y solo se
-ejecutó el modo `mask`.
+*Sustento:* 312 celdas, 4 semillas, con hipótesis primaria registrada, y la vara
+calculada aparte con tres pisos exactos y uno alcanzable. Con dos reservas
+declaradas en [Resultados](03-resultados.md): sobre `code` la escalera estrecha
+se queda en 0.2477, por debajo del 0.1982 del barrido v4, y solo se ejecutó el
+modo `mask`. La objeción del checkpoint queda respondida dentro del propio
+factorial: el brazo con preentrenamiento RBM no colapsa en esa celda —mejor
+checkpoint en el paso 28 875 de 30 000, sin degradación posterior— y da el mismo
+veredicto.
 
 ### 3. Correspondencia arquitectura–estructura
 
@@ -133,9 +145,11 @@ Ninguno de estos invalida lo hecho. Son extensiones.
 | 8 | ~~Ajuste fino con tasa pequeña para preentrenados~~ | Probado: en L=250 empeora un 74 %. Solo aplicaría a L=35 |
 | 9 | Búsqueda de arquitectura por tasa | Ancho a tasas agresivas, escalera a holgadas: falta barrer anchos intermedios |
 | 10 | Simulación post-FEC con LDPC real | Convierte la estructura de confianza favorable en una cifra de BER operativo |
-| 12 | Correr `flip` sobre `code`, y añadir `oversamp` a la rejilla | `flip` es la corrupción adecuada para un código de bloque; con `oversamp` la tabla de `ber_tapados` queda como una escalera de cinco puntos ordenada por entropía |
+| 12 | Correr `flip` sobre `code`, y añadir `oversamp` a la rejilla medida | `flip` es la corrupción adecuada para un código de bloque; la vara de `oversamp` ya está calculada (0.0006 a *p*=0.10) y falta la medición, que dejaría la tabla de `ber_tapados` como una escalera de cinco puntos ordenada por entropía |
 | 13 | Repetir el factorial sobre `code` con el MLP ancho | La escalera estrecha rinde 0.2477 ahí, por debajo del 0.1982 del barrido v4 |
 | 14 | Regenerar la columna `vara` de `data/denoising/denoising_resumen.csv` y el diccionario `VARAS` de `rbm_stack.py` | Ambos conservan los valores previos al recálculo: contra ellos `lowdim` L=70 parece victoria y es derrota |
+| 15 | Piso de Bayes para `ber_tapados` en `lowdim` | El techo actual es el estimador de margen máximo, una vara alcanzable. El óptimo exigiría integrar la gaussiana sobre el cono de signos observados (hit-and-run), y solo entonces el 87 % sería fracción de un óptimo y no de un método |
+| 16 | Registrar `pre_max` por *p* sobre `code` | La mejora monótona con el ruido en L=125 admite dos explicaciones: regularización, o que tapar reduce la norma de entrada y retrasa el colapso de escala. El mejor checkpoint pasa de 1 500 a 2 250 con toda *p* > 0, compatible con la segunda |
 | 11 | Cuantizador que minimice BER en vez de MSE | Lloyd-Max es óptimo en MSE de la proyección, no en la métrica del proyecto. Podría fortalecer la vara aún más, aunque la evidencia sugiere retornos decrecientes |
 | 6 | VQ-VAE | La variante de VAE que aplica: latentes discretos y codebook como modelo de entropía. Un VAE gaussiano iría en contra: el término KL acota superiormente `I(x;z)` y reduciría la información justo cuando se quiere maximizarla |
 
@@ -190,9 +204,11 @@ versiones y hash de cada script.
 ## Preguntas abiertas
 
 1. ¿Un objetivo auxiliar permitiría explotar la redundancia algebraica?
-   **Respondida para el enmascarado, no cerrada.** El modelo aprende a inferir
-   bits tapados en `lowdim` y `markov` pero sobre `code` apenas: 0.4946 ± 0.0074,
-   un 2.3 % por encima de azar. Falta probarlo con `flip`, que es la corrupción
+   **Respondida para el enmascarado, no cerrada.** El modelo infiere los bits
+   tapados casi al tope en `lowdim` y `markov` —87 % y 97 % de lo alcanzable— y
+   sobre `code` apenas: 4.8 % a L=250, donde además el cuello tiene exactamente
+   la entropía de la fuente y la tasa no es la restricción activa. Falta
+   probarlo con `flip`, que es la corrupción
    teóricamente adecuada sobre un código de bloque —corregir volteos con los
    checks es decodificación por síndrome— y está implementada sin correr.
 2. ¿Se mantiene el resultado sobre `code` con un LDPC estándar en lugar de un

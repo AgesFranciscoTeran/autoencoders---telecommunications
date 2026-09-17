@@ -86,6 +86,32 @@ python3 code/consolidar_varas.py --verificar   # no escribe; compara CSV y JSON
 Ese modo es el que conviene dejar en cualquier comprobación previa a publicar:
 falla si el CSV en disco no es exactamente lo que el JSON implica.
 
+### La vara de `ber_tapados`
+
+`ber_tapados` —el BER medido solo en las posiciones enmascaradas— se reportó
+durante dos semanas contra 0.5 y contra nada más. `vara_tapados.py` calcula el
+techo: el mejor valor alcanzable por alguien que conoce la estructura de la
+fuente.
+
+```bash
+python3 code/vara_tapados.py                 # -> data/varas_tapados.json
+python3 code/vara_tapados.py --sin-comparar  # solo la vara, sin leer el nivel 3
+```
+
+Tarda unos 25 segundos y no necesita GPU. Cuatro de las cinco fuentes admiten el
+óptimo de Bayes en forma cerrada —`random` analítico, `oversamp` por
+combinatoria de bloques, `markov` por forward-backward y `code` por rango sobre
+GF(2)— y son **pisos exactos**. `lowdim` no: ahí la posterior es una gaussiana
+restringida a un cono, así que se usa el estimador de margen máximo conociendo
+*W*, que es una **vara alcanzable**, no un óptimo demostrado. La salida etiqueta
+cada fila con su tipo, y conviene conservar la distinción al citarla.
+
+Si existen `data/denoising/denoising_resumen.csv` o
+`data/combinado/combinado.csv`, imprime además medido contra vara y la fracción
+del camino realmente alcanzable. Las dos corridas salen etiquetadas por origen y
+no se fusionan: son experimentos distintos, y mezclarlos en una misma fila ya
+costó una corrección.
+
 ### Qué comprobar
 
 | Comprobación | Criterio |
@@ -94,6 +120,7 @@ falla si el CSV en disco no es exactamente lo que el JSON implica.
 | `code` a 250 bits | `oraculo 250/250` con BER 0.0000 |
 | `oversamp` a 125 bits | `decimacion m=4 (hold)` con BER 0.0000 |
 | PCA sobre `code` ≈ PCA sobre `random` | diferencia < 0.001 en los 4 escalones |
+| vara de `ber_tapados` sobre `random` | 0.5000 con sd 0.0000 en las tres *p* |
 
 ---
 
@@ -198,6 +225,7 @@ Dos avisos sobre los datos ya publicados de este nivel:
 │   ├── generar_figuras.py     nivel 1: figuras
 │   ├── vara_definitiva.py     nivel 1: calcula la vara vigente (Lloyd-Max)
 │   ├── consolidar_varas.py    nivel 1: JSON de varas -> baselines_clasicos.csv
+│   ├── vara_tapados.py        nivel 1: vara de ber_tapados (Bayes + margen máximo)
 │   ├── ae_telecom_v4.py       nivel 2: arnés principal de autoencoders
 │   ├── gate_test.py           nivel 2: test de calibración
 │   ├── check_v4.py            nivel 2: verificación post-corrida

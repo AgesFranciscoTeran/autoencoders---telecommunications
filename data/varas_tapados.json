@@ -1,6 +1,6 @@
 {
  "script": "code/vara_tapados.py",
- "fecha_utc": "2026-09-17T03:50:12Z",
+ "fecha_utc": "2026-09-17T04:42:42Z",
  "numpy": "2.0.2",
  "config": {
   "fuentes": "code,lowdim,markov,oversamp,random",

@@ -707,6 +707,65 @@ limpia del repositorio deshacía la corrección más cara del proyecto. Una
 retractación no termina hasta que el valor viejo no puede volver por sí solo, y
 eso se consigue con un verificador, no con un párrafo.
 
+### 2026-09-16 · La vara que le faltaba a `ber_tapados`
+
+`ber_tapados` era el único número del proyecto sin techo. Se reportaba contra
+0.5, que es el piso trivial, y contra nada por arriba. La normalización «recupera
+un X % del camino» usaba implícitamente la inferencia perfecta como denominador,
+y la inferencia perfecta **no es alcanzable**: con enmascarado a tasa *p*, ni un
+oráculo infiere un bit cuyos vecinos informativos también quedaron tapados.
+
+`vara_tapados.py` la calcula, en 25 segundos y sin GPU. Cuatro de las cinco
+fuentes admiten el óptimo de Bayes en forma cerrada —`random` analítico,
+`oversamp` por combinatoria de bloques, `markov` por forward-backward y `code`
+por rango sobre GF(2)—; `lowdim` no, y ahí el techo es el estimador de margen
+máximo conociendo *W*, una vara alcanzable y no un óptimo demostrado. La
+distinción está etiquetada en la salida y en el texto.
+
+| *p* | `oversamp` | `code` | `markov` | `lowdim` | `random` |
+|---|---|---|---|---|---|
+| 0.10 | 0.0006 | **0.0231** | 0.0506 | 0.0566 | 0.5000 |
+
+**El orden de esa fila es el hallazgo.** Después de `oversamp`, la fuente cuyos
+bits tapados son más recuperables es `code`: el 97.7 % se determina exactamente
+por rango, más que en `markov` o en `lowdim`. La redundancia algebraica es la
+estructura *más* informativa de las tres para rellenar huecos, y es donde el
+autoencoder aprovecha menos. Normalizado, a L=250: 97 % en `markov`, 87 % en
+`lowdim`, **4.8 %** en `code`. Deja de ser «se queda al borde del azar» y pasa a
+ser una brecha de dos órdenes de magnitud contra un techo medido.
+
+**Dos correcciones al separar los brazos del factorial.**
+
+- El **0.4946 ± 0.0074** publicado para `code` promedia dos regímenes. El brazo
+  de inicialización aleatoria colapsa en esa celda —mejor checkpoint en el paso
+  1 500 de 30 000, antes de que OneCycle llegue a su máximo en el 3 000, y
+  +0.025 de BER después— y se queda pegado a 0.5000. El brazo RBM entrena los
+  30 000 pasos sin degradarse y da 0.4803 ± 0.0047. Casi toda la desviación
+  venía de mezclarlos. Retirado.
+- «En `code` la cifra no se mueve» era cierto solo en el brazo que colapsa. En
+  el sano es monótona con L: 0.8 % → 3.0 % → 4.8 % entre L=70, 125 y 250, a 3.6,
+  5.9 y 11.9 desviaciones de 0.5. El mecanismo de Vincent opera también sobre
+  álgebra, con la misma forma cualitativa y unas veinte veces más débil.
+
+Con eso, **la objeción del checkpoint deja de ser una concesión**: la respuesta
+estaba dentro del factorial, en una columna que nunca se había separado. El
+párrafo defensivo de la revisión externa se convierte en refutación sin correr
+nada nuevo en GPU.
+
+**Una explicación alternativa que queda abierta.** La mejora monótona con *p* en
+`code` L=125 se atribuyó a regularización. Pero tapar reduce la norma de la
+entrada, que es justo lo que alimenta la explosión de escala de `gate_test3`, y
+el mejor checkpoint pasa de 1 500 con *p*=0 a 2 250 con toda *p* > 0: el
+enmascarado **retrasa el colapso**. Si el efecto fuera ese, la mejora no diría
+nada sobre regularización y sí sobre estabilidad numérica. Distinguirlas solo
+exige registrar `pre_max` por *p*, instrumentación que ya existe. Extensión 16.
+
+**La lección, y es incómoda.** El proyecto lleva semanas sosteniendo que un BER
+sin vara no significa nada, y publicó durante dos semanas una métrica sin vara.
+La regla se aplicó a la métrica principal y no a la que se inventó por el
+camino. Las métricas nuevas nacen sin baseline: es en ese momento cuando hay que
+dárselo, no después de citarlas en tres páginas.
+
 Ver [Hacia un paper](07-hacia-paper.md) para lo que queda abierto.
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/MathJax.js?config=TeX-MML-AM_CHTML" async></script>
