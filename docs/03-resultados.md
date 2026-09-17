@@ -332,45 +332,137 @@ Lo que hace interpretable el resultado es una métrica añadida para el caso,
 `ber_tapados`: el BER medido **solo en las posiciones corrompidas**, que mide
 directamente si el modelo infiere los bits ocultos.
 
-| fuente | L | `ber_tapados` | |
-|---|---|---|---|
-| `code` | 125 | 0.5000 ± 0.0005 | prácticamente azar |
-| `code` | 250 | **0.5001 ± 0.0003** | prácticamente azar |
-| `random` | 250 | 0.5000 ± 0.0004 | correcto, es imposible |
-| `lowdim` | 70 | 0.1713 ± 0.0041 | infiere con fuerza |
-| `lowdim` | 250 | 0.1129 ± 0.0044 | infiere con más fuerza |
-| `markov` | 70 | 0.1197 ± 0.0014 | infiere con fuerza |
-| `markov` | 250 | 0.0762 ± 0.0056 | infiere con más fuerza |
+### La vara de `ber_tapados`
 
-*(Todas las celdas salen de la misma corrida de denoising: media sobre las tres
-*p* > 0 y las cuatro semillas. La rejilla usa dos escalones por fuente, y no son
-los mismos en todas. La desviación es entre semillas; promediar los dos
-escalones en una sola cifra la inflaría hasta siete veces, porque casi toda la
-variación es entre escalones.)*
+`ber_tapados` se reportó durante dos semanas contra 0.5 y contra nada más. Era
+el único número del proyecto sin techo, y sin techo no se puede decir si 0.11 en
+`lowdim` es mucho o poco. Peor: normalizar como «recupera un X % del camino»
+usaba implícitamente la inferencia perfecta como denominador, y la inferencia
+perfecta **no es alcanzable**. Con enmascarado a tasa *p*, ni un oráculo infiere
+un bit cuyos vecinos informativos también quedaron tapados.
 
-El gradiente por escalones dice algo por sí solo: en `lowdim` y `markov`, más
-bits significan mejor inferencia de lo tapado. En `code` la cifra no se mueve.
+`code/vara_tapados.py` calcula el mejor `ber_tapados` alcanzable por alguien que
+conoce la estructura. Cuatro de las cinco fuentes admiten el óptimo de Bayes en
+forma cerrada:
 
-**El mecanismo funciona; sobre estructura algebraica, apenas.** En `lowdim` y
-`markov` el modelo aprende a rellenar lo que se le tapa. En `code` se queda al
-borde del azar.
+| fuente | oráculo | tipo |
+|---|---|---|
+| `random` | 0.5 analítico | piso exacto |
+| `oversamp` | una posición está determinada si sobrevive alguna de sus 3 hermanas | piso exacto |
+| `markov` | forward-backward sobre la cadena, error de Bayes por bit min(*q*, 1−*q*) | piso exacto |
+| `code` | rango sobre GF(2): determinada si su funcional cae en el generado por los visibles | piso exacto |
+| `lowdim` | margen máximo sobre las visibles conociendo *W* (medición de un bit) | **vara alcanzable** |
 
-**Una precisión que el dato exige.** En el factorial posterior, con 64 celdas de
-`code` y las dos inicializaciones, el valor es **0.4946 ± 0.0074**: está 5.9
-desviaciones por debajo de 0.5, así que *no es azar exacto*. Y el desvío crece
-con la tasa de forma monótona; a L=250 con *p*=0.10 llega a 0.4884, o sea que
-recupera un **2.3 % del camino** hacia la inferencia perfecta. Comparado con
-`random`, cuya desviación estándar es veinte veces menor, la diferencia es real.
+La distinción importa al citarlo. En `lowdim` la posterior es una gaussiana
+restringida a un cono y la predicción de Bayes exigiría integrar sobre él; lo
+que se usa es el estimador de margen máximo, que es un método concreto con
+conocimiento perfecto de la estructura, no un óptimo demostrado.
 
-Es una cifra pequeña, y rima con el 21 % del camino que el autoencoder recorre
-en BER sobre esa misma fuente. La afirmación defendible es *«recupera en torno
-al 2 % de la estructura disponible»*, no *«no infiere nada»*: esta última es
-falsable con tres líneas de pandas sobre el CSV publicado.
+| *p* | `oversamp` | `code` | `markov` | `lowdim` | `random` |
+|---|---|---|---|---|---|
+| 0.10 | 0.0006 | **0.0231** | 0.0506 | 0.0566 | 0.5000 |
+| 0.25 | 0.0077 | 0.0521 | 0.0530 | 0.0630 | 0.5000 |
+| 0.50 | 0.0624 | 0.2089 | 0.0646 | 0.0761 | 0.5000 |
 
-Como regularizador sí sirve en un punto: `lowdim` L=250 con *p*=0.10 da
-**0.0346**, mejor que el preentrenamiento RBM (0.0370) y que la inicialización
-aleatoria (0.0386). No cambia ningún veredicto —ese punto ya ganaba— pero
-amplía su margen.
+*(4 semillas; `code` con 200 muestras por celda, el resto entre 400 y 5 000. La
+sd entre semillas es ≤ 0.005 en todas las celdas; `oversamp` aún no está en la
+rejilla medida, ver extensión 12.)*
+
+El orden de esa primera fila es el resultado por sí solo. **A *p*=0.10 la fuente
+con el piso más bajo, después de `oversamp`, es `code`:** el 97.7 % de los bits
+tapados son recuperables, más que en `markov` o `lowdim`. La redundancia
+algebraica es la estructura *más* informativa de las tres para rellenar huecos.
+Y es donde el autoencoder aprovecha menos.
+
+### La tabla, por brazo
+
+El factorial corre las dos inicializaciones, y separarlas cambia lo que se puede
+afirmar. Con *p*=0.10, media sobre 4 semillas:
+
+| fuente | brazo | L=35 | L=70 | L=125 | L=250 |
+|---|---|---|---|---|---|
+| `code` | aleatoria | 0.4937 | 0.4998 | 0.5001 | 0.4999 |
+| `code` | **RBM** | 0.4948 | 0.4963 | **0.4857** | **0.4769** |
+| `lowdim` | aleatoria | 0.2678 | 0.1705 | 0.1233 | 0.1131 |
+| `lowdim` | RBM | 0.2170 | 0.1465 | 0.1181 | 0.1129 |
+| `markov` | aleatoria | 0.2125 | 0.1200 | 0.0736 | 0.0732 |
+| `markov` | RBM | 0.1881 | 0.1085 | 0.0767 | **0.0637** |
+| `random` | ambos | — | — | — | 0.5002–0.5004 |
+
+Normalizado contra la vara, como fracción del camino realmente alcanzable:
+
+| fuente | brazo | L=35 | L=70 | L=125 | L=250 |
+|---|---|---|---|---|---|
+| `code` | aleatoria | 1.3 % | 0.0 % | 0.0 % | 0.0 % |
+| `code` | **RBM** | 1.1 % | 0.8 % | **3.0 %** | **4.8 %** |
+| `lowdim` | aleatoria | 52.4 % | 74.3 % | 85.0 % | 87.2 % |
+| `lowdim` | RBM | 63.8 % | 79.7 % | 86.1 % | 87.3 % |
+| `markov` | aleatoria | 64.0 % | 84.5 % | 94.9 % | 95.0 % |
+| `markov` | RBM | 69.4 % | 87.1 % | 94.2 % | **97.1 %** |
+
+`random` no aparece porque su vara **es** 0.5: el margen es nulo y la fracción no
+está definida. Que el control quede exactamente donde el oráculo dice que tiene
+que quedar, 0.5002 ± 0.0003, es lo que hace creíble el resto de la columna.
+
+Tres lecturas:
+
+1. **En `markov` y `lowdim` el mecanismo de Vincent funciona casi al tope.** A
+   L=250 el autoencoder recupera el 97 % de la inferencia disponible sobre
+   correlación y el 87 % sobre geometría. No es «infiere con fuerza»: es «infiere
+   casi todo lo que hay».
+2. **En `code` recupera menos del 5 %,** y eso sobre la fuente cuyo oráculo es el
+   más fuerte de las tres. La brecha no es de grado, es de dos órdenes de
+   magnitud.
+3. **La cifra de `code` sí se mueve con L, en el brazo sano.** 0.8 % → 3.0 % →
+   4.8 % entre L=70, 125 y 250, monótona, a 3.6, 5.9 y 11.9 desviaciones de 0.5.
+   La afirmación anterior —«en `code` la cifra no se mueve»— era cierta solo en
+   el brazo de inicialización aleatoria, que es el que colapsa (abajo). La
+   versión correcta es que el mecanismo opera también sobre álgebra, con la misma
+   forma cualitativa, pero unas veinte veces más débil.
+
+Conviene no confundir dos causas dentro de esa fracción: un valor bajo puede ser
+que el modelo no aprenda la estructura o que el cuello no dé para transportarla.
+El caso limpio es `code` L=250, donde el latente tiene exactamente los 250 bits
+de entropía de la fuente y la tasa **no** es la restricción activa. Ahí la
+fracción es 4.8 %.
+
+### Limitación: sobre `code` el arnés rinde por debajo del mejor conocido
+
+El factorial usa la **escalera estrecha**, y sobre `code` rinde peor que el MLP
+ancho del barrido v4:
+
+| | `code` L=250 |
+|---|---|
+| copiar 250 bits y adivinar el resto | 0.2500 |
+| **factorial, escalera estrecha, *p*=0** | **0.2477** |
+| barrido v4, MLP ancho | 0.1982 |
+
+El valor del factorial está prácticamente en la solución trivial. Y en el brazo
+de inicialización aleatoria el mejor checkpoint llega en el paso **1 500 de
+30 000** sobre `code` y `random`, frente a ~28 000 sobre `lowdim` y `markov`: el
+modelo alcanza la solución trivial antes de que `OneCycle` llegue a su tasa
+máxima (paso 3 000) y se degrada después, +0.025 de BER entre el mejor
+checkpoint y el final. Entrenó los 30 000 pasos, pero dejó de mejorar en el 5 %
+inicial.
+
+**La línea plana de `code` en ese brazo está medida en un régimen donde esa
+arquitectura no progresa.** Es la primera objeción que un revisor plantearía, y
+la respuesta está en los datos del propio factorial: el brazo con
+preentrenamiento RBM **no colapsa** en esa misma celda.
+
+| brazo | `code` L=250 | mejor checkpoint | mejor → final | `ber_tapados` |
+|---|---|---|---|---|
+| aleatoria | 0.2478 | paso 1 500 | +0.0246 | 0.5001 |
+| **RBM** | 0.2495 | paso 28 875 | −0.0000 | **0.4803** |
+
+El brazo sano entrena el esquema completo sin degradarse y sigue dando BER en la
+solución trivial e inferencia de lo tapado por debajo del 5 % de lo disponible.
+El veredicto sobre `code` no depende del colapso.
+
+Eso obliga además a retirar una cifra anterior. El **0.4946 ± 0.0074** que se
+publicó para `code` promedia los dos regímenes, y casi toda esa desviación viene
+de mezclar un brazo pegado a 0.5000 con otro en 0.48. La cifra defendible es la
+del brazo sano, por escalón, y es la de la tabla de arriba.
 
 ### El enmascarado ayuda en `code`, pero no por el mecanismo de Vincent
 
@@ -387,39 +479,28 @@ semillas en las tres *p*:
 La mejora es de 0.0041, unas **24 desviaciones**. Refuta P4 («*p*=0.50 empeora
 en todas las fuentes») mucho más directamente que el caso de `lowdim` L=70.
 
-Lo relevante es el mecanismo: mejora **sin que `ber_tapados` se mueva de 0.495**.
-El enmascarado actúa aquí como regularizador puro, no por la vía que predice la
-hipótesis de Vincent. Matiza la frase anterior: sobre álgebra el enmascarado
-**sí produce un efecto, solo que no el que se esperaba**. Sigue perdiendo contra
-la vara (0.3317 con el cuantizador recalculado), así que no cambia ningún
-veredicto.
+Lo relevante es el mecanismo: mejora **sin que la inferencia de lo tapado pase
+del 3 % de lo disponible**. El enmascarado actúa aquí como regularizador, no por
+la vía que predice la hipótesis de Vincent. Sigue perdiendo contra la vara
+(0.3317 con el cuantizador recalculado), así que no cambia ningún veredicto.
+
+Queda una explicación alternativa sin descartar, y es barata de probar. Tapar
+reduce la norma de la entrada, y la norma de la entrada es justo lo que alimenta
+la explosión de escala que ya documentó `gate_test3`. Compatible con el dato: el
+mejor checkpoint pasa del paso 1 500 con *p*=0 al 2 250 con toda *p* > 0, o sea
+que el enmascarado **retrasa el colapso**. Si el efecto fuera ese, la mejora
+monótona en *p* no diría nada sobre regularización y sí sobre estabilidad
+numérica. Distinguirlas solo exige registrar `pre_max` por *p*, que esa
+instrumentación ya existe.
 
 *(Mismo comentario para `lowdim` L=70, donde *p*=0.50 gana 4/4 de 0.1376 a
 0.1327 mientras *p*=0.10 y *p*=0.25 pierden 0/4. Con sd de 0.0022 en el control,
 esa victoria es de 2 a 3 sigmas: más frágil de lo que sugiere el 4/4.)*
 
-### Limitación: sobre `code` el arnés rinde por debajo del mejor conocido
-
-El factorial usa la **escalera estrecha**, y sobre `code` rinde peor que el MLP
-ancho del barrido v4:
-
-| | `code` L=250 |
-|---|---|
-| copiar 250 bits y adivinar el resto | 0.2500 |
-| **factorial, escalera estrecha, *p*=0** | **0.2477** |
-| barrido v4, MLP ancho | 0.1982 |
-
-El valor del factorial está prácticamente en la solución trivial. Y el mejor
-checkpoint llega en el paso **~1 500 de 30 000** sobre `code` y `random`, frente
-a ~27 750 sobre `lowdim` y `markov`: el modelo alcanza la solución trivial
-pronto y se degrada después. Entrenó los 30 000 pasos —no se cortó— pero dejó de
-mejorar en el 5 % inicial.
-
-**La línea plana de `code` está medida en un régimen donde esa arquitectura no
-progresa**, y por debajo del mejor punto que el propio proyecto ya tenía para esa
-celda. No creo que cambie el veredicto, porque `ber_tapados` es evidencia más
-directa que el BER y apunta igual, pero es la primera objeción que un revisor
-plantearía y debe constar.
+Como regularizador sí sirve en un punto: `lowdim` L=250 con *p*=0.10 da
+**0.0346**, mejor que el preentrenamiento RBM (0.0370) y que la inicialización
+aleatoria (0.0386). No cambia ningún veredicto —ese punto ya ganaba— pero amplía
+su margen.
 
 ### Preentrenamiento y ruido compiten
 

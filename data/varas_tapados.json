@@ -1,0 +1,1031 @@
+{
+ "script": "code/vara_tapados.py",
+ "fecha_utc": "2026-09-17T03:50:12Z",
+ "numpy": "2.0.2",
+ "config": {
+  "fuentes": "code,lowdim,markov,oversamp,random",
+  "p": "0.1,0.25,0.5",
+  "seeds": "0,1,2,3",
+  "n": 0,
+  "iters": 600,
+  "quick": false,
+  "sin_comparar": false
+ },
+ "varas": [
+  {
+   "fuente": "code",
+   "p": 0.1,
+   "vara": 0.023143928656808574,
+   "sd": 0.004727829189266563,
+   "n": 200,
+   "seeds": [
+    0,
+    1,
+    2,
+    3
+   ],
+   "tipo": "piso exacto"
+  },
+  {
+   "fuente": "code",
+   "p": 0.25,
+   "vara": 0.05208769127787136,
+   "sd": 0.004106118478084746,
+   "n": 200,
+   "seeds": [
+    0,
+    1,
+    2,
+    3
+   ],
+   "tipo": "piso exacto"
+  },
+  {
+   "fuente": "code",
+   "p": 0.5,
+   "vara": 0.20887254383756637,
+   "sd": 0.0029897119990611345,
+   "n": 200,
+   "seeds": [
+    0,
+    1,
+    2,
+    3
+   ],
+   "tipo": "piso exacto"
+  },
+  {
+   "fuente": "lowdim",
+   "p": 0.1,
+   "vara": 0.05656778605534466,
+   "sd": 0.0020806296351998698,
+   "n": 400,
+   "seeds": [
+    0,
+    1,
+    2,
+    3
+   ],
+   "tipo": "vara alcanzable"
+  },
+  {
+   "fuente": "lowdim",
+   "p": 0.25,
+   "vara": 0.06297768807154563,
+   "sd": 0.0015133333511714185,
+   "n": 400,
+   "seeds": [
+    0,
+    1,
+    2,
+    3
+   ],
+   "tipo": "vara alcanzable"
+  },
+  {
+   "fuente": "lowdim",
+   "p": 0.5,
+   "vara": 0.07608830717694974,
+   "sd": 0.0006558790705665542,
+   "n": 400,
+   "seeds": [
+    0,
+    1,
+    2,
+    3
+   ],
+   "tipo": "vara alcanzable"
+  },
+  {
+   "fuente": "markov",
+   "p": 0.1,
+   "vara": 0.05055668391750043,
+   "sd": 0.00022042766393307007,
+   "n": 2000,
+   "seeds": [
+    0,
+    1,
+    2,
+    3
+   ],
+   "tipo": "piso exacto"
+  },
+  {
+   "fuente": "markov",
+   "p": 0.25,
+   "vara": 0.052965846610695325,
+   "sd": 0.00017814167718156168,
+   "n": 2000,
+   "seeds": [
+    0,
+    1,
+    2,
+    3
+   ],
+   "tipo": "piso exacto"
+  },
+  {
+   "fuente": "markov",
+   "p": 0.5,
+   "vara": 0.06459668809897745,
+   "sd": 0.0002082171234132879,
+   "n": 2000,
+   "seeds": [
+    0,
+    1,
+    2,
+    3
+   ],
+   "tipo": "piso exacto"
+  },
+  {
+   "fuente": "oversamp",
+   "p": 0.1,
+   "vara": 0.0005520875521729198,
+   "sd": 5.413295114785372e-05,
+   "n": 5000,
+   "seeds": [
+    0,
+    1,
+    2,
+    3
+   ],
+   "tipo": "piso exacto"
+  },
+  {
+   "fuente": "oversamp",
+   "p": 0.25,
+   "vara": 0.007706991167592039,
+   "sd": 0.00012450721302110574,
+   "n": 5000,
+   "seeds": [
+    0,
+    1,
+    2,
+    3
+   ],
+   "tipo": "piso exacto"
+  },
+  {
+   "fuente": "oversamp",
+   "p": 0.5,
+   "vara": 0.06238447566075698,
+   "sd": 0.0003351492594362104,
+   "n": 5000,
+   "seeds": [
+    0,
+    1,
+    2,
+    3
+   ],
+   "tipo": "piso exacto"
+  },
+  {
+   "fuente": "random",
+   "p": 0.1,
+   "vara": 0.5,
+   "sd": 0.0,
+   "n": 5000,
+   "seeds": [
+    0,
+    1,
+    2,
+    3
+   ],
+   "tipo": "piso exacto"
+  },
+  {
+   "fuente": "random",
+   "p": 0.25,
+   "vara": 0.5,
+   "sd": 0.0,
+   "n": 5000,
+   "seeds": [
+    0,
+    1,
+    2,
+    3
+   ],
+   "tipo": "piso exacto"
+  },
+  {
+   "fuente": "random",
+   "p": 0.5,
+   "vara": 0.5,
+   "sd": 0.0,
+   "n": 5000,
+   "seeds": [
+    0,
+    1,
+    2,
+    3
+   ],
+   "tipo": "piso exacto"
+  }
+ ],
+ "comparacion": [
+  {
+   "origen": "denoising",
+   "fuente": "code",
+   "arm": "ladder_random",
+   "L": 125,
+   "p": 0.1,
+   "ber_tapados": 0.500070625201222,
+   "vara": 0.023143928656808574,
+   "fraccion": -0.0001481059075605251,
+   "tipo_vara": "piso exacto"
+  },
+  {
+   "origen": "denoising",
+   "fuente": "code",
+   "arm": "ladder_random",
+   "L": 250,
+   "p": 0.1,
+   "ber_tapados": 0.49987017513658594,
+   "vara": 0.023143928656808574,
+   "fraccion": 0.00027225167344179337,
+   "tipo_vara": "piso exacto"
+  },
+  {
+   "origen": "denoising",
+   "fuente": "code",
+   "arm": "ladder_random",
+   "L": 125,
+   "p": 0.25,
+   "ber_tapados": 0.5000906491576383,
+   "vara": 0.05208769127787136,
+   "fraccion": -0.00020238148377070176,
+   "tipo_vara": "piso exacto"
+  },
+  {
+   "origen": "denoising",
+   "fuente": "code",
+   "arm": "ladder_random",
+   "L": 250,
+   "p": 0.25,
+   "ber_tapados": 0.5002439879767466,
+   "vara": 0.05208769127787136,
+   "fraccion": -0.0005447226432395095,
+   "tipo_vara": "piso exacto"
+  },
+  {
+   "origen": "denoising",
+   "fuente": "code",
+   "arm": "ladder_random",
+   "L": 125,
+   "p": 0.5,
+   "ber_tapados": 0.49998073251144415,
+   "vara": 0.20887254383756637,
+   "fraccion": 6.61823134438467e-05,
+   "tipo_vara": "piso exacto"
+  },
+  {
+   "origen": "denoising",
+   "fuente": "code",
+   "arm": "ladder_random",
+   "L": 250,
+   "p": 0.5,
+   "ber_tapados": 0.5001542786658661,
+   "vara": 0.20887254383756637,
+   "fraccion": -0.000529935128413544,
+   "tipo_vara": "piso exacto"
+  },
+  {
+   "origen": "denoising",
+   "fuente": "lowdim",
+   "arm": "ladder_random",
+   "L": 70,
+   "p": 0.1,
+   "ber_tapados": 0.17049162061544001,
+   "vara": 0.05656778605534466,
+   "fraccion": 0.7430862463810216,
+   "tipo_vara": "vara alcanzable"
+  },
+  {
+   "origen": "denoising",
+   "fuente": "lowdim",
+   "arm": "ladder_random",
+   "L": 250,
+   "p": 0.1,
+   "ber_tapados": 0.11311929486552541,
+   "vara": 0.05656778605534466,
+   "fraccion": 0.872468650152605,
+   "tipo_vara": "vara alcanzable"
+  },
+  {
+   "origen": "denoising",
+   "fuente": "lowdim",
+   "arm": "ladder_random",
+   "L": 70,
+   "p": 0.25,
+   "ber_tapados": 0.17588392310170947,
+   "vara": 0.06297768807154563,
+   "fraccion": 0.7416465202155448,
+   "tipo_vara": "vara alcanzable"
+  },
+  {
+   "origen": "denoising",
+   "fuente": "lowdim",
+   "arm": "ladder_random",
+   "L": 250,
+   "p": 0.25,
+   "ber_tapados": 0.10756262871561033,
+   "vara": 0.06297768807154563,
+   "fraccion": 0.8979801730320721,
+   "tipo_vara": "vara alcanzable"
+  },
+  {
+   "origen": "denoising",
+   "fuente": "lowdim",
+   "arm": "ladder_random",
+   "L": 70,
+   "p": 0.5,
+   "ber_tapados": 0.16741009519356595,
+   "vara": 0.07608830717694974,
+   "fraccion": 0.7845735572697782,
+   "tipo_vara": "vara alcanzable"
+  },
+  {
+   "origen": "denoising",
+   "fuente": "lowdim",
+   "arm": "ladder_random",
+   "L": 250,
+   "p": 0.5,
+   "ber_tapados": 0.11794716033317282,
+   "vara": 0.07608830717694974,
+   "fraccion": 0.9012557240932351,
+   "tipo_vara": "vara alcanzable"
+  },
+  {
+   "origen": "denoising",
+   "fuente": "markov",
+   "arm": "ladder_random",
+   "L": 70,
+   "p": 0.1,
+   "ber_tapados": 0.12002876812624114,
+   "vara": 0.05055668391750043,
+   "fraccion": 0.8454263714181292,
+   "tipo_vara": "piso exacto"
+  },
+  {
+   "origen": "denoising",
+   "fuente": "markov",
+   "arm": "ladder_random",
+   "L": 250,
+   "p": 0.1,
+   "ber_tapados": 0.07319259160705686,
+   "vara": 0.05055668391750043,
+   "fraccion": 0.949635678450269,
+   "tipo_vara": "piso exacto"
+  },
+  {
+   "origen": "denoising",
+   "fuente": "markov",
+   "arm": "ladder_random",
+   "L": 70,
+   "p": 0.25,
+   "ber_tapados": 0.11815382576219952,
+   "vara": 0.052965846610695325,
+   "fraccion": 0.8541767364813969,
+   "tipo_vara": "piso exacto"
+  },
+  {
+   "origen": "denoising",
+   "fuente": "markov",
+   "arm": "ladder_random",
+   "L": 250,
+   "p": 0.25,
+   "ber_tapados": 0.0717475484936165,
+   "vara": 0.052965846610695325,
+   "fraccion": 0.9579859799513686,
+   "tipo_vara": "piso exacto"
+  },
+  {
+   "origen": "denoising",
+   "fuente": "markov",
+   "arm": "ladder_random",
+   "L": 70,
+   "p": 0.5,
+   "ber_tapados": 0.12081822202890946,
+   "vara": 0.06459668809897745,
+   "fraccion": 0.8708748133208677,
+   "tipo_vara": "piso exacto"
+  },
+  {
+   "origen": "denoising",
+   "fuente": "markov",
+   "arm": "ladder_random",
+   "L": 250,
+   "p": 0.5,
+   "ber_tapados": 0.08377384404525667,
+   "vara": 0.06459668809897745,
+   "fraccion": 0.9559554201309368,
+   "tipo_vara": "piso exacto"
+  },
+  {
+   "origen": "denoising",
+   "fuente": "random",
+   "arm": "ladder_random",
+   "L": 250,
+   "p": 0.1,
+   "ber_tapados": 0.5003816972978569,
+   "vara": 0.5,
+   "fraccion": null,
+   "tipo_vara": "piso exacto"
+  },
+  {
+   "origen": "denoising",
+   "fuente": "random",
+   "arm": "ladder_random",
+   "L": 250,
+   "p": 0.25,
+   "ber_tapados": 0.49995342619367167,
+   "vara": 0.5,
+   "fraccion": null,
+   "tipo_vara": "piso exacto"
+  },
+  {
+   "origen": "denoising",
+   "fuente": "random",
+   "arm": "ladder_random",
+   "L": 250,
+   "p": 0.5,
+   "ber_tapados": 0.49974698444466503,
+   "vara": 0.5,
+   "fraccion": null,
+   "tipo_vara": "piso exacto"
+  },
+  {
+   "origen": "factorial",
+   "fuente": "code",
+   "arm": "ladder_random",
+   "L": 35,
+   "p": 0.1,
+   "ber_tapados": 0.4936875698492309,
+   "vara": 0.023143928656808574,
+   "fraccion": 0.013237600462941508,
+   "tipo_vara": "piso exacto"
+  },
+  {
+   "origen": "factorial",
+   "fuente": "code",
+   "arm": "ladder_random",
+   "L": 70,
+   "p": 0.1,
+   "ber_tapados": 0.4997836327286569,
+   "vara": 0.023143928656808574,
+   "fraccion": 0.00045373705892776833,
+   "tipo_vara": "piso exacto"
+  },
+  {
+   "origen": "factorial",
+   "fuente": "code",
+   "arm": "ladder_random",
+   "L": 125,
+   "p": 0.1,
+   "ber_tapados": 0.500070625201222,
+   "vara": 0.023143928656808574,
+   "fraccion": -0.0001481059075605251,
+   "tipo_vara": "piso exacto"
+  },
+  {
+   "origen": "factorial",
+   "fuente": "code",
+   "arm": "ladder_random",
+   "L": 250,
+   "p": 0.1,
+   "ber_tapados": 0.49987017513658594,
+   "vara": 0.023143928656808574,
+   "fraccion": 0.00027225167344179337,
+   "tipo_vara": "piso exacto"
+  },
+  {
+   "origen": "factorial",
+   "fuente": "code",
+   "arm": "ladder_random",
+   "L": 35,
+   "p": 0.25,
+   "ber_tapados": 0.4980381585604968,
+   "vara": 0.05208769127787136,
+   "fraccion": 0.0043799676885420075,
+   "tipo_vara": "piso exacto"
+  },
+  {
+   "origen": "factorial",
+   "fuente": "code",
+   "arm": "ladder_random",
+   "L": 70,
+   "p": 0.25,
+   "ber_tapados": 0.5000538722866995,
+   "vara": 0.05208769127787136,
+   "fraccion": -0.00012027418235770918,
+   "tipo_vara": "piso exacto"
+  },
+  {
+   "origen": "factorial",
+   "fuente": "code",
+   "arm": "ladder_random",
+   "L": 125,
+   "p": 0.25,
+   "ber_tapados": 0.5000906491576383,
+   "vara": 0.05208769127787136,
+   "fraccion": -0.00020238148377070176,
+   "tipo_vara": "piso exacto"
+  },
+  {
+   "origen": "factorial",
+   "fuente": "code",
+   "arm": "ladder_random",
+   "L": 250,
+   "p": 0.25,
+   "ber_tapados": 0.5002439879767466,
+   "vara": 0.05208769127787136,
+   "fraccion": -0.0005447226432395095,
+   "tipo_vara": "piso exacto"
+  },
+  {
+   "origen": "factorial",
+   "fuente": "code",
+   "arm": "stacked_rbm",
+   "L": 35,
+   "p": 0.1,
+   "ber_tapados": 0.494778736622443,
+   "vara": 0.023143928656808574,
+   "fraccion": 0.010949348642767505,
+   "tipo_vara": "piso exacto"
+  },
+  {
+   "origen": "factorial",
+   "fuente": "code",
+   "arm": "stacked_rbm",
+   "L": 70,
+   "p": 0.1,
+   "ber_tapados": 0.49632722259915457,
+   "vara": 0.023143928656808574,
+   "fraccion": 0.007702066979036417,
+   "tipo_vara": "piso exacto"
+  },
+  {
+   "origen": "factorial",
+   "fuente": "code",
+   "arm": "stacked_rbm",
+   "L": 125,
+   "p": 0.1,
+   "ber_tapados": 0.4856941959852831,
+   "vara": 0.023143928656808574,
+   "fraccion": 0.03000025557904892,
+   "tipo_vara": "piso exacto"
+  },
+  {
+   "origen": "factorial",
+   "fuente": "code",
+   "arm": "stacked_rbm",
+   "L": 250,
+   "p": 0.1,
+   "ber_tapados": 0.47690858214234216,
+   "vara": 0.023143928656808574,
+   "fraccion": 0.048424292454984884,
+   "tipo_vara": "piso exacto"
+  },
+  {
+   "origen": "factorial",
+   "fuente": "code",
+   "arm": "stacked_rbm",
+   "L": 35,
+   "p": 0.25,
+   "ber_tapados": 0.49777079013901854,
+   "vara": 0.05208769127787136,
+   "fraccion": 0.004976889041833404,
+   "tipo_vara": "piso exacto"
+  },
+  {
+   "origen": "factorial",
+   "fuente": "code",
+   "arm": "stacked_rbm",
+   "L": 70,
+   "p": 0.25,
+   "ber_tapados": 0.49592818181941645,
+   "vara": 0.05208769127787136,
+   "fraccion": 0.009090659268105952,
+   "tipo_vara": "piso exacto"
+  },
+  {
+   "origen": "factorial",
+   "fuente": "code",
+   "arm": "stacked_rbm",
+   "L": 125,
+   "p": 0.25,
+   "ber_tapados": 0.4900340577675975,
+   "vara": 0.05208769127787136,
+   "fraccion": 0.022249761925129553,
+   "tipo_vara": "piso exacto"
+  },
+  {
+   "origen": "factorial",
+   "fuente": "code",
+   "arm": "stacked_rbm",
+   "L": 250,
+   "p": 0.25,
+   "ber_tapados": 0.4837567545702252,
+   "vara": 0.05208769127787136,
+   "fraccion": 0.03626434262571608,
+   "tipo_vara": "piso exacto"
+  },
+  {
+   "origen": "factorial",
+   "fuente": "lowdim",
+   "arm": "ladder_random",
+   "L": 35,
+   "p": 0.1,
+   "ber_tapados": 0.26779446414400004,
+   "vara": 0.05656778605534466,
+   "fraccion": 0.5236550898960658,
+   "tipo_vara": "vara alcanzable"
+  },
+  {
+   "origen": "factorial",
+   "fuente": "lowdim",
+   "arm": "ladder_random",
+   "L": 70,
+   "p": 0.1,
+   "ber_tapados": 0.17049162061544001,
+   "vara": 0.05656778605534466,
+   "fraccion": 0.7430862463810216,
+   "tipo_vara": "vara alcanzable"
+  },
+  {
+   "origen": "factorial",
+   "fuente": "lowdim",
+   "arm": "ladder_random",
+   "L": 125,
+   "p": 0.1,
+   "ber_tapados": 0.12328627011185593,
+   "vara": 0.05656778605534466,
+   "fraccion": 0.8495407370993611,
+   "tipo_vara": "vara alcanzable"
+  },
+  {
+   "origen": "factorial",
+   "fuente": "lowdim",
+   "arm": "ladder_random",
+   "L": 250,
+   "p": 0.1,
+   "ber_tapados": 0.11311929486552541,
+   "vara": 0.05656778605534466,
+   "fraccion": 0.872468650152605,
+   "tipo_vara": "vara alcanzable"
+  },
+  {
+   "origen": "factorial",
+   "fuente": "lowdim",
+   "arm": "ladder_random",
+   "L": 35,
+   "p": 0.25,
+   "ber_tapados": 0.26922862672224046,
+   "vara": 0.06297768807154563,
+   "fraccion": 0.528053984839885,
+   "tipo_vara": "vara alcanzable"
+  },
+  {
+   "origen": "factorial",
+   "fuente": "lowdim",
+   "arm": "ladder_random",
+   "L": 70,
+   "p": 0.25,
+   "ber_tapados": 0.17588392310170947,
+   "vara": 0.06297768807154563,
+   "fraccion": 0.7416465202155448,
+   "tipo_vara": "vara alcanzable"
+  },
+  {
+   "origen": "factorial",
+   "fuente": "lowdim",
+   "arm": "ladder_random",
+   "L": 125,
+   "p": 0.25,
+   "ber_tapados": 0.1287791406419153,
+   "vara": 0.06297768807154563,
+   "fraccion": 0.8494322812032029,
+   "tipo_vara": "vara alcanzable"
+  },
+  {
+   "origen": "factorial",
+   "fuente": "lowdim",
+   "arm": "ladder_random",
+   "L": 250,
+   "p": 0.25,
+   "ber_tapados": 0.10756262871561033,
+   "vara": 0.06297768807154563,
+   "fraccion": 0.8979801730320721,
+   "tipo_vara": "vara alcanzable"
+  },
+  {
+   "origen": "factorial",
+   "fuente": "lowdim",
+   "arm": "stacked_rbm",
+   "L": 35,
+   "p": 0.1,
+   "ber_tapados": 0.21701637944141142,
+   "vara": 0.05656778605534466,
+   "fraccion": 0.6381665825340956,
+   "tipo_vara": "vara alcanzable"
+  },
+  {
+   "origen": "factorial",
+   "fuente": "lowdim",
+   "arm": "stacked_rbm",
+   "L": 70,
+   "p": 0.1,
+   "ber_tapados": 0.14652830270070874,
+   "vara": 0.05656778605534466,
+   "fraccion": 0.7971267900338157,
+   "tipo_vara": "vara alcanzable"
+  },
+  {
+   "origen": "factorial",
+   "fuente": "lowdim",
+   "arm": "stacked_rbm",
+   "L": 125,
+   "p": 0.1,
+   "ber_tapados": 0.1181052811435111,
+   "vara": 0.05656778605534466,
+   "fraccion": 0.86122457243071,
+   "tipo_vara": "vara alcanzable"
+  },
+  {
+   "origen": "factorial",
+   "fuente": "lowdim",
+   "arm": "stacked_rbm",
+   "L": 250,
+   "p": 0.1,
+   "ber_tapados": 0.1129017726614068,
+   "vara": 0.05656778605534466,
+   "fraccion": 0.872959192330819,
+   "tipo_vara": "vara alcanzable"
+  },
+  {
+   "origen": "factorial",
+   "fuente": "lowdim",
+   "arm": "stacked_rbm",
+   "L": 35,
+   "p": 0.25,
+   "ber_tapados": 0.22249206828733112,
+   "vara": 0.06297768807154563,
+   "fraccion": 0.6349971709410116,
+   "tipo_vara": "vara alcanzable"
+  },
+  {
+   "origen": "factorial",
+   "fuente": "lowdim",
+   "arm": "stacked_rbm",
+   "L": 70,
+   "p": 0.25,
+   "ber_tapados": 0.15240406115810695,
+   "vara": 0.06297768807154563,
+   "fraccion": 0.7953734382760727,
+   "tipo_vara": "vara alcanzable"
+  },
+  {
+   "origen": "factorial",
+   "fuente": "lowdim",
+   "arm": "stacked_rbm",
+   "L": 125,
+   "p": 0.25,
+   "ber_tapados": 0.12446845815147302,
+   "vara": 0.06297768807154563,
+   "fraccion": 0.8592960395807111,
+   "tipo_vara": "vara alcanzable"
+  },
+  {
+   "origen": "factorial",
+   "fuente": "lowdim",
+   "arm": "stacked_rbm",
+   "L": 250,
+   "p": 0.25,
+   "ber_tapados": 0.10821256449207531,
+   "vara": 0.06297768807154563,
+   "fraccion": 0.8964929817406322,
+   "tipo_vara": "vara alcanzable"
+  },
+  {
+   "origen": "factorial",
+   "fuente": "markov",
+   "arm": "ladder_random",
+   "L": 35,
+   "p": 0.1,
+   "ber_tapados": 0.21251814704399075,
+   "vara": 0.05055668391750043,
+   "fraccion": 0.6396398448235889,
+   "tipo_vara": "piso exacto"
+  },
+  {
+   "origen": "factorial",
+   "fuente": "markov",
+   "arm": "ladder_random",
+   "L": 70,
+   "p": 0.1,
+   "ber_tapados": 0.12002876812624114,
+   "vara": 0.05055668391750043,
+   "fraccion": 0.8454263714181292,
+   "tipo_vara": "piso exacto"
+  },
+  {
+   "origen": "factorial",
+   "fuente": "markov",
+   "arm": "ladder_random",
+   "L": 125,
+   "p": 0.1,
+   "ber_tapados": 0.07361053006915502,
+   "vara": 0.05055668391750043,
+   "fraccion": 0.9487057759527948,
+   "tipo_vara": "piso exacto"
+  },
+  {
+   "origen": "factorial",
+   "fuente": "markov",
+   "arm": "ladder_random",
+   "L": 250,
+   "p": 0.1,
+   "ber_tapados": 0.07319259160705686,
+   "vara": 0.05055668391750043,
+   "fraccion": 0.949635678450269,
+   "tipo_vara": "piso exacto"
+  },
+  {
+   "origen": "factorial",
+   "fuente": "markov",
+   "arm": "ladder_random",
+   "L": 35,
+   "p": 0.25,
+   "ber_tapados": 0.19371973304820111,
+   "vara": 0.052965846610695325,
+   "fraccion": 0.6851384052642423,
+   "tipo_vara": "piso exacto"
+  },
+  {
+   "origen": "factorial",
+   "fuente": "markov",
+   "arm": "ladder_random",
+   "L": 70,
+   "p": 0.25,
+   "ber_tapados": 0.11815382576219952,
+   "vara": 0.052965846610695325,
+   "fraccion": 0.8541767364813969,
+   "tipo_vara": "piso exacto"
+  },
+  {
+   "origen": "factorial",
+   "fuente": "markov",
+   "arm": "ladder_random",
+   "L": 125,
+   "p": 0.25,
+   "ber_tapados": 0.07653001840559617,
+   "vara": 0.052965846610695325,
+   "fraccion": 0.9472877595229738,
+   "tipo_vara": "piso exacto"
+  },
+  {
+   "origen": "factorial",
+   "fuente": "markov",
+   "arm": "ladder_random",
+   "L": 250,
+   "p": 0.25,
+   "ber_tapados": 0.0717475484936165,
+   "vara": 0.052965846610695325,
+   "fraccion": 0.9579859799513686,
+   "tipo_vara": "piso exacto"
+  },
+  {
+   "origen": "factorial",
+   "fuente": "markov",
+   "arm": "stacked_rbm",
+   "L": 35,
+   "p": 0.1,
+   "ber_tapados": 0.18808792725208517,
+   "vara": 0.05055668391750043,
+   "fraccion": 0.6939964653755368,
+   "tipo_vara": "piso exacto"
+  },
+  {
+   "origen": "factorial",
+   "fuente": "markov",
+   "arm": "stacked_rbm",
+   "L": 70,
+   "p": 0.1,
+   "ber_tapados": 0.10849137885450363,
+   "vara": 0.05055668391750043,
+   "fraccion": 0.8710967704626655,
+   "tipo_vara": "piso exacto"
+  },
+  {
+   "origen": "factorial",
+   "fuente": "markov",
+   "arm": "stacked_rbm",
+   "L": 125,
+   "p": 0.1,
+   "ber_tapados": 0.07669650388325135,
+   "vara": 0.05055668391750043,
+   "fraccion": 0.941839562342156,
+   "tipo_vara": "piso exacto"
+  },
+  {
+   "origen": "factorial",
+   "fuente": "markov",
+   "arm": "stacked_rbm",
+   "L": 250,
+   "p": 0.1,
+   "ber_tapados": 0.06366998659713496,
+   "vara": 0.05055668391750043,
+   "fraccion": 0.9708232335193356,
+   "tipo_vara": "piso exacto"
+  },
+  {
+   "origen": "factorial",
+   "fuente": "markov",
+   "arm": "stacked_rbm",
+   "L": 35,
+   "p": 0.25,
+   "ber_tapados": 0.1901510315649012,
+   "vara": 0.052965846610695325,
+   "fraccion": 0.6931214675341894,
+   "tipo_vara": "piso exacto"
+  },
+  {
+   "origen": "factorial",
+   "fuente": "markov",
+   "arm": "stacked_rbm",
+   "L": 70,
+   "p": 0.25,
+   "ber_tapados": 0.11158905196950003,
+   "vara": 0.052965846610695325,
+   "fraccion": 0.8688619092873827,
+   "tipo_vara": "piso exacto"
+  },
+  {
+   "origen": "factorial",
+   "fuente": "markov",
+   "arm": "stacked_rbm",
+   "L": 125,
+   "p": 0.25,
+   "ber_tapados": 0.08036908214168773,
+   "vara": 0.052965846610695325,
+   "fraccion": 0.9386999062079985,
+   "tipo_vara": "piso exacto"
+  },
+  {
+   "origen": "factorial",
+   "fuente": "markov",
+   "arm": "stacked_rbm",
+   "L": 250,
+   "p": 0.25,
+   "ber_tapados": 0.06738474568247657,
+   "vara": 0.052965846610695325,
+   "fraccion": 0.9677454195334727,
+   "tipo_vara": "piso exacto"
+  },
+  {
+   "origen": "factorial",
+   "fuente": "random",
+   "arm": "ladder_random",
+   "L": 250,
+   "p": 0.1,
+   "ber_tapados": 0.5003816972978569,
+   "vara": 0.5,
+   "fraccion": null,
+   "tipo_vara": "piso exacto"
+  },
+  {
+   "origen": "factorial",
+   "fuente": "random",
+   "arm": "ladder_random",
+   "L": 250,
+   "p": 0.25,
+   "ber_tapados": 0.4999534261936717,
+   "vara": 0.5,
+   "fraccion": null,
+   "tipo_vara": "piso exacto"
+  },
+  {
+   "origen": "factorial",
+   "fuente": "random",
+   "arm": "stacked_rbm",
+   "L": 250,
+   "p": 0.1,
+   "ber_tapados": 0.5001935750259277,
+   "vara": 0.5,
+   "fraccion": null,
+   "tipo_vara": "piso exacto"
+  },
+  {
+   "origen": "factorial",
+   "fuente": "random",
+   "arm": "stacked_rbm",
+   "L": 250,
+   "p": 0.25,
+   "ber_tapados": 0.5000790337981498,
+   "vara": 0.5,
+   "fraccion": null,
+   "tipo_vara": "piso exacto"
+  }
+ ]
+}
